@@ -214,7 +214,7 @@ function ingredientSectionsHtml(r: Recipe): string {
     if (g.lines.length === 0) continue
     html += `
     <section>
-      <h3 class="text-soft font-bold mb-2 flex items-center gap-2"><span class="w-4 h-[3px] rounded-full bg-accent inline-block"></span>${g.label} <span class="text-faint font-normal text-sm">${g.lines.length}</span></h3>
+      <h3 class="font-bold mb-2">${g.label} <span class="text-faint font-normal text-sm">${g.lines.length}</span></h3>
       <div class="card !shadow-none p-3.5 md:p-4">
         ${g.lines
           .map(
@@ -236,7 +236,7 @@ function stepsHtml(r: Recipe): string {
   if (r.steps.length === 0) return ''
   return `
   <section>
-    <h3 class="text-soft font-bold mb-3 flex items-center gap-2"><span class="w-4 h-[3px] rounded-full bg-accent inline-block"></span>步驟</h3>
+    <h3 class="font-bold mb-3">步驟</h3>
     <ol class="space-y-4">
       ${r.steps
         .map(
@@ -272,23 +272,23 @@ function buildModal(r: Recipe): void {
   currentServings = r.servings || 4
   const url = photoUrl(r, false)
   const photo = url
-    ? `<img src="${esc(url)}" alt="${esc(r.title)}" class="w-full aspect-[16/9] object-cover">`
-    : `<div class="w-full aspect-[16/9] bg-cream flex items-center justify-center text-faint">${ic('image', 48)}</div>`
+    ? `<img src="${esc(url)}" alt="${esc(r.title)}" class="w-full aspect-[16/9] object-cover rounded-2xl">`
+    : `<div class="w-full aspect-[16/9] bg-cream flex items-center justify-center text-faint rounded-2xl">${ic('image', 48)}</div>`
 
   root.innerHTML = `
     <div class="modal-backdrop" data-action="close-modal"></div>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-label="${esc(r.title)}">
-      <div class="relative shrink-0">
-        ${photo}
-        <div class="absolute top-3 right-3 flex gap-2">
-          <button class="quick-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" title="加入／移出今日餐點" aria-label="加入今日餐點">${ic('chef', 16)}</button>
-          <button class="quick-btn" data-action="edit-recipe" data-slug="${esc(r.slug)}" title="編輯食譜">${ic('pencil', 15)}</button>
-          <button class="quick-btn" data-action="delete-recipe" data-slug="${esc(r.slug)}" title="刪除食譜">${ic('trash', 15)}</button>
-          <button class="quick-btn" data-action="close-modal" title="關閉">${ic('x', 16)}</button>
-        </div>
-      </div>
-      <div class="modal-scroll flex-1 px-5 md:px-8 py-5 md:py-6">
+      <div class="modal-scroll flex-1 px-5 md:px-8 py-5 md:py-6" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))">
         <div class="space-y-5 md:space-y-6">
+          <div class="relative">
+            ${photo}
+            <div class="absolute top-3 right-3 flex gap-2">
+              <button class="quick-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" title="加入／移出今日餐點" aria-label="加入今日餐點">${ic('chef', 16)}</button>
+              <button class="quick-btn" data-action="edit-recipe" data-slug="${esc(r.slug)}" title="編輯食譜">${ic('pencil', 15)}</button>
+              <button class="quick-btn" data-action="delete-recipe" data-slug="${esc(r.slug)}" title="刪除食譜">${ic('trash', 15)}</button>
+              <button class="quick-btn" data-action="close-modal" title="關閉">${ic('x', 16)}</button>
+            </div>
+          </div>
           <div>
             <h2 class="text-2xl font-bold leading-snug">${esc(sp(r.title))}</h2>
             <div class="mt-3 flex flex-wrap gap-1.5">
@@ -312,15 +312,14 @@ function buildModal(r: Recipe): void {
             </div>
           </div>
 
-          <div data-ing-list>${ingredientSectionsHtml(r)}</div>
+          <div data-ing-list class="space-y-5 md:space-y-6">${ingredientSectionsHtml(r)}</div>
+
+          <div class="flex items-center justify-end gap-2">
+            <button class="btn-ghost !py-2" data-action="add-checked" disabled>${ic('basket', 16)} 加入選取</button>
+            <button class="btn-accent !py-2" data-action="add-all">${ic('basket', 16)} 全部加入</button>
+          </div>
+
           ${stepsHtml(r)}
-        </div>
-      </div>
-      <div class="shrink-0 border-t border-line bg-card px-4 md:px-8 py-3 flex items-center justify-between gap-3" style="padding-bottom:calc(0.75rem + env(safe-area-inset-bottom))">
-        <span class="text-sm text-faint" data-ing-count>未勾選食材</span>
-        <div class="flex gap-2">
-          <button class="btn-ghost !py-2" data-action="add-checked" disabled>${ic('basket', 16)} 加入選取</button>
-          <button class="btn-accent !py-2" data-action="add-all">${ic('basket', 16)} 全部加入</button>
         </div>
       </div>
     </div>`
@@ -347,10 +346,11 @@ function refreshModal(): void {
 
 function updateIngCount(): void {
   const n = document.querySelectorAll('.ing-check:checked').length
-  const el = document.querySelector('[data-ing-count]')
   const btn = document.querySelector('[data-action="add-checked"]') as HTMLButtonElement | null
-  if (el) el.textContent = n > 0 ? `已勾選 ${n} 項食材` : '未勾選食材'
-  if (btn) btn.disabled = n === 0
+  if (btn) {
+    btn.disabled = n === 0
+    btn.innerHTML = `${ic('basket', 16)} ${n > 0 ? `加入選取(${n})` : '加入選取'}`
+  }
 }
 
 function closeModal(): void {
