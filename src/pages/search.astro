@@ -105,7 +105,7 @@ const recipes = await loadAllRecipes()
 </style>
 
 <script>
-  import { getRecipes, recipeCardHtml, ic } from '../lib/ui'
+  import { getRecipes, recipeCardHtml, ic, onReady } from '../lib/ui'
 
   const filters = { q: '', type: '全部', cuisine: '全部', category: '' }
 
@@ -176,7 +176,7 @@ const recipes = await loadAllRecipes()
     render()
   }
 
-  document.addEventListener('tj:ready', () => {
+  onReady(() => {
     let debounce: ReturnType<typeof setTimeout> | null = null
     document.getElementById('search-input')?.addEventListener('input', (e) => {
       filters.q = (e.target as HTMLInputElement).value

@@ -63,7 +63,7 @@ const recipes = await loadAllRecipes()
 </Layout>
 
 <script>
-  import { getRecipes, recipeCardHtml, todayCardHtml, ic, esc, sp } from '../lib/ui'
+  import { getRecipes, recipeCardHtml, todayCardHtml, ic, esc, sp, onReady } from '../lib/ui'
   import * as state from '../lib/state'
 
   let mode: 'recent' | 'cooked' = 'recent'
@@ -122,7 +122,7 @@ const recipes = await loadAllRecipes()
     if (mode === 'cooked') renderGrid()
   }
 
-  document.addEventListener('tj:ready', () => {
+  onReady(() => {
     renderToday()
     renderGrid()
     bind()

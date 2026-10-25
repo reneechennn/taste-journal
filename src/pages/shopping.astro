@@ -38,7 +38,7 @@ import Icon from '../components/Icon.astro'
 
 <script>
   import * as state from '../lib/state'
-  import { ic, esc, sp, toast, requireAuth, confirmDialog } from '../lib/ui'
+  import { ic, esc, sp, toast, requireAuth, confirmDialog, onReady } from '../lib/ui'
   import { formatQty } from '../lib/parser'
   import type { ShoppingItem } from '../lib/types'
 
@@ -106,7 +106,7 @@ import Icon from '../components/Icon.astro'
     document.dispatchEvent(new CustomEvent('tj:state'))
   }
 
-  document.addEventListener('tj:ready', () => {
+  onReady(() => {
     render()
 
     document.getElementById('shopping-list')?.addEventListener('click', (e) => {

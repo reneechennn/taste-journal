@@ -126,7 +126,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
   import type { Recipe } from '../lib/types'
   import { parseIngredientLines, parseSteps, sp } from '../lib/parser'
   import { REPO, hasAuth, login, writeTextFile, uploadImage, deleteFile } from '../lib/github'
-  import { toast, confirmDialog, ic, esc, requireAuth } from '../lib/ui'
+  import { toast, confirmDialog, ic, esc, requireAuth, onReady } from '../lib/ui'
   import * as state from '../lib/state'
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
@@ -419,5 +419,5 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
     }
   }
 
-  document.addEventListener('tj:ready', () => void boot())
+  onReady(() => void boot())
 </script>

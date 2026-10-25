@@ -560,6 +560,14 @@ function setupDelegation(): void {
 
 // ---------- 啟動 ----------
 
+let readyFired = false
+
+/** 頁面腳本用：不管狀態載入完成的先後順序，callback 一定會被呼叫到 */
+export function onReady(cb: () => void) {
+  if (readyFired) cb()
+  else document.addEventListener('tj:ready', () => cb(), { once: true })
+}
+
 export function initUI(): void {
   const captured = captureToken()
 
@@ -596,6 +604,7 @@ export function initUI(): void {
     .catch(() => null)
     .then(() => {
       window.TJ.state = state.snapshot()
+      readyFired = true // 先標記再廣播，晚加入的監聽會直接執行
       document.dispatchEvent(new CustomEvent('tj:ready'))
       refreshChefButtons()
       updateBadge()
