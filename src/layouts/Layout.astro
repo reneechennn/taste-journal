@@ -67,6 +67,19 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
             ))
           }
         </nav>
+        {/* 新增食譜：每個分頁都看得到 */}
+        <a href="/edit" class="hidden md:inline-flex btn-accent !py-1.5 !px-4 text-sm" aria-label="新增食譜">
+          <Icon name="plus" size={15} />
+          新增食譜
+        </a>
+        <a
+          href="/edit"
+          class="md:hidden quick-btn !w-[42px] !h-[42px]"
+          aria-label="新增食譜"
+          title="新增食譜"
+        >
+          <Icon name="plus" size={20} />
+        </a>
         <button id="auth-chip" data-action="login" class="chip !text-[13px]">
           <Icon name="login" size={15} />
           登入

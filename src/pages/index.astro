@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro'
 import RecipeCard from '../components/RecipeCard.astro'
 import Icon from '../components/Icon.astro'
 import { loadAllRecipes } from '../lib/parseCollection'
-import { CATEGORIES } from '../lib/types'
 
 const recipes = await loadAllRecipes()
 ---
@@ -26,23 +25,11 @@ const recipes = await loadAllRecipes()
 
   {/* ---------- 區塊二：食譜列表 ---------- */}
   <section aria-label="食譜列表">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-3 px-1">
+    <div class="flex items-center justify-between gap-3 mb-4 px-1">
       <h2 class="text-lg font-bold">食譜列表</h2>
-      <div class="flex items-center gap-2">
-        <a href="/edit" class="btn-accent !py-1.5 !px-4 text-sm">
-          <Icon name="plus" size={15} /> 新增食譜
-        </a>
-      </div>
-    </div>
-
-    {/* 排序切換 */}
-    <div class="flex items-center gap-2 mb-3 flex-wrap">
-      <button class="chip is-on" data-mode="recent" id="mode-recent">最近新增</button>
-      <button class="chip" data-mode="cooked" id="mode-cooked">經常烹調</button>
-      <span class="hidden sm:block w-px h-5 bg-line mx-1"></span>
-      <div class="flex gap-2 overflow-x-auto flex-1 min-w-0 pb-0.5 -mx-1 px-1" id="cat-chips">
-        <button class="chip is-on" data-cat="">全部</button>
-        {CATEGORIES.map((c) => <button class="chip" data-cat={c}>{c}</button>)}
+      <div class="flex items-center gap-1 bg-card border border-line rounded-full p-1" role="group" aria-label="排序方式">
+        <button class="sort-pill is-on" data-mode="recent">最近新增</button>
+        <button class="sort-pill" data-mode="cooked">經常烹調</button>
       </div>
     </div>
 
@@ -50,6 +37,22 @@ const recipes = await loadAllRecipes()
       {recipes.map((r) => <RecipeCard recipe={r} />)}
     </div>
   </section>
+
+  <style>
+    .sort-pill {
+      padding: 0.32rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 13px;
+      color: var(--color-soft);
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .sort-pill:hover { color: var(--color-ink); }
+    .sort-pill.is-on {
+      background: var(--color-accent);
+      color: #fff;
+    }
+  </style>
 
   {/* 食譜資料島（前端互動用） */}
   <script
@@ -64,7 +67,6 @@ const recipes = await loadAllRecipes()
   import * as state from '../lib/state'
 
   let mode: 'recent' | 'cooked' = 'recent'
-  let cat = ''
 
   const $grid = () => document.getElementById('recipe-grid')!
 
@@ -90,8 +92,7 @@ const recipes = await loadAllRecipes()
   }
 
   function renderGrid() {
-    let list = [...getRecipes()]
-    if (cat) list = list.filter((r) => r.category === cat)
+    const list = [...getRecipes()]
     if (mode === 'cooked') {
       const counts = state.snapshot().counts
       list.sort(
@@ -103,7 +104,7 @@ const recipes = await loadAllRecipes()
     $grid().innerHTML =
       list.length > 0
         ? list.map(recipeCardHtml).join('')
-        : `<div class="sm:col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">這個分類還沒有食譜<br><a href="/edit" class="text-accent-deep underline decoration-accent-soft underline-offset-4 mt-2 inline-block">新增一道 ${ic('plus', 13)}</a></div>`
+        : `<div class="sm:col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">還沒有任何食譜<br><a href="/edit" class="text-accent-deep underline decoration-accent-soft underline-offset-4 mt-2 inline-block">新增第一道 ${ic('plus', 13)}</a></div>`
   }
 
   function bind() {
@@ -111,15 +112,6 @@ const recipes = await loadAllRecipes()
       btn.addEventListener('click', () => {
         mode = btn.dataset.mode as 'recent' | 'cooked'
         document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('is-on', b === btn))
-        renderGrid()
-      })
-    })
-    document.querySelectorAll<HTMLButtonElement>('#cat-chips [data-cat]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        cat = btn.dataset.cat ?? ''
-        document
-          .querySelectorAll('#cat-chips [data-cat]')
-          .forEach((b) => b.classList.toggle('is-on', b === btn))
         renderGrid()
       })
     })
