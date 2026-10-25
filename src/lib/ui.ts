@@ -220,7 +220,7 @@ function ingredientSectionsHtml(r: Recipe): string {
           .map(
             (l, i) => `
         <label class="flex items-center gap-3 py-[7px]">
-          <input type="checkbox" class="ing-check w-[18px] h-[18px] shrink-0" style="accent-color:var(--color-accent)" data-section="${g.key}" data-idx="${i}">
+          <span class="ing-round"><input type="checkbox" class="ing-check" data-section="${g.key}" data-idx="${i}"><span class="ball">${ic('check', 13)}</span></span>
           <span class="flex-1 leading-relaxed">${esc(sp(l.name))}</span>
           <span class="text-soft whitespace-nowrap" data-qty>${esc(sp(scaledText(l, r.servings, currentServings)))}</span>
         </label>`,
@@ -278,7 +278,7 @@ function buildModal(r: Recipe): void {
   root.innerHTML = `
     <div class="modal-backdrop" data-action="close-modal"></div>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-label="${esc(r.title)}">
-      <div class="modal-scroll flex-1 px-5 md:px-8 py-5 md:py-6" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))">
+      <div class="modal-scroll flex-1 px-5 md:px-8 py-5 md:py-6" style="padding-bottom:calc(2.5rem + env(safe-area-inset-bottom))">
         <div class="space-y-5 md:space-y-6">
           <div class="relative">
             ${photo}
@@ -314,9 +314,9 @@ function buildModal(r: Recipe): void {
 
           <div data-ing-list class="space-y-5 md:space-y-6">${ingredientSectionsHtml(r)}</div>
 
-          <div class="flex items-center justify-end gap-2">
-            <button class="btn-ghost !py-2" data-action="add-checked" disabled>${ic('basket', 16)} 加入選取</button>
-            <button class="btn-accent !py-2" data-action="add-all">${ic('basket', 16)} 全部加入</button>
+          <div class="flex items-center gap-2">
+            <button class="btn-ghost flex-1 !py-2.5" data-action="add-checked" disabled>${ic('basket', 16)} 加入選取</button>
+            <button class="btn-accent flex-1 !py-2.5" data-action="add-all">${ic('basket', 16)} 全部加入</button>
           </div>
 
           ${stepsHtml(r)}

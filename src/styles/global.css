@@ -297,7 +297,41 @@ svg.ic {
   vertical-align: -0.15em;
 }
 
-/* ============ 無障礙 ============ */
+/* 詳情頁食材圓形勾選框（未選＝淺灰細框，勾選填色） */
+.ing-round {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+}
+.ing-round input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.ing-round .ball {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid #dad1c3;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ing-round input:checked + .ball {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* 無障礙 ============ */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
