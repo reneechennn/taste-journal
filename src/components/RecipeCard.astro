@@ -9,18 +9,7 @@ interface Props {
 const { recipe: r } = Astro.props
 const url = (r.photoThumb && `/photos/thumbs/${encodeURIComponent(r.photoThumb)}`) || (r.photo && `/photos/${encodeURIComponent(r.photo)}`) || ''
 ---
-<article class="card overflow-hidden relative flex flex-col">
-  <div class="absolute top-3 right-3 z-10 flex gap-2">
-    <button class="quick-btn" data-action="toggle-today" data-slug={r.slug} title="加入／移出今日餐點" aria-label="加入今日餐點">
-      <Icon name="chef" size={18} />
-    </button>
-    <button class="quick-btn" data-action="edit-recipe" data-slug={r.slug} title="編輯食譜" aria-label="編輯食譜">
-      <Icon name="pencil" size={16} />
-    </button>
-    <button class="quick-btn" data-action="delete-recipe" data-slug={r.slug} title="刪除食譜" aria-label="刪除食譜">
-      <Icon name="trash" size={16} />
-    </button>
-  </div>
+<article class="card overflow-hidden flex flex-col">
   <div class="cursor-pointer flex flex-col flex-1" data-action="open-recipe" data-slug={r.slug}>
     {
       url ? (

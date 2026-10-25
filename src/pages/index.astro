@@ -15,7 +15,7 @@ const recipes = await loadAllRecipes()
         今日餐點
         <span id="today-date" class="text-sm font-normal text-faint"></span>
       </h2>
-      <span class="text-xs text-faint">點 <span class="text-accent-deep"><Icon name="chef" size={13} /></span> 加入食譜</span>
+      <span class="text-xs text-faint">打開食譜即可排入</span>
     </div>
     <div id="today-list" class="grid gap-3 sm:grid-cols-2">
       <div class="skeleton h-20"></div>
@@ -87,7 +87,7 @@ const recipes = await loadAllRecipes()
     }
     listEl.innerHTML =
       list.length === 0
-        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，從下面挑幾道吧</div>`
+        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，點開食譜就能加入</div>`
         : list.map(todayCardHtml).join('')
   }
 

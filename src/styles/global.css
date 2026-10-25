@@ -198,6 +198,29 @@ main {
     line-height: 1.7;
   }
 
+  /* 詳情頁：加入今日餐點大按鈕 */
+  .today-btn {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 1.1rem;
+    padding: 0.85rem 1rem;
+    font-size: 15px;
+    box-shadow: 0 8px 18px -10px rgba(194, 112, 75, 0.6);
+    transition: background 0.18s ease, transform 0.12s ease;
+  }
+  .today-btn:hover { background: var(--color-accent-deep); }
+  .today-btn:active { transform: scale(0.98); }
+  .today-btn.is-on {
+    background: var(--color-leaf);
+    box-shadow: 0 8px 18px -10px rgba(126, 140, 110, 0.6);
+  }
+  .today-btn.is-on:hover { background: #6d7b60; }
+
   /* Modal 遮罩與面板 */
   .modal-backdrop {
     position: fixed;

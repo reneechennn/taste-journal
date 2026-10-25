@@ -165,12 +165,7 @@ export function recipeCardHtml(r: Recipe): string {
     ? `<img src="${esc(url)}" alt="${esc(r.title)}" loading="lazy" class="w-full aspect-[4/3] object-cover">`
     : `<div class="w-full aspect-[4/3] bg-cream flex items-center justify-center text-faint">${ic('image', 40)}</div>`
   return `
-  <article class="card overflow-hidden relative flex flex-col">
-    <div class="absolute top-3 right-3 z-10 flex gap-2">
-      <button class="quick-btn" data-action="toggle-today" data-slug="${esc(r.slug)}" title="加入／移出今日餐點" aria-label="加入今日餐點">${ic('chef', 18)}</button>
-      <button class="quick-btn" data-action="edit-recipe" data-slug="${esc(r.slug)}" title="編輯食譜" aria-label="編輯">${ic('pencil', 16)}</button>
-      <button class="quick-btn" data-action="delete-recipe" data-slug="${esc(r.slug)}" title="刪除食譜" aria-label="刪除">${ic('trash', 16)}</button>
-    </div>
+  <article class="card overflow-hidden flex flex-col">
     <div class="cursor-pointer flex flex-col flex-1" data-action="open-recipe" data-slug="${esc(r.slug)}">
       ${photo}
       <div class="p-4 md:p-5 flex flex-col flex-1">
@@ -302,6 +297,10 @@ function buildModal(r: Recipe): void {
             </div>
           </div>
 
+          <button class="today-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" data-today-btn>
+            ${ic('chef', 18)}<span data-today-label>${state.inToday(r.slug) ? '已排入今日餐點 · 點擊移出' : '加入今日餐點'}</span>
+          </button>
+
           <div class="card !shadow-none flex items-center justify-between px-4 py-3 bg-cream/60">
             <div class="text-sm text-soft leading-relaxed">調整用餐人數<br><span class="text-xs text-faint">食材會即時換算</span></div>
             <div class="flex items-center gap-3">
@@ -396,6 +395,16 @@ export function syncModalFromHash(): void {
     }
   }
   closeModal()
+}
+
+/** 詳情頁的「加入今日餐點」按鈕狀態刷新 */
+function refreshTodayButton(): void {
+  const btn = document.querySelector<HTMLElement>('[data-today-btn]')
+  if (!btn || !currentRecipe) return
+  const on = state.inToday(currentRecipe.slug)
+  btn.classList.toggle('is-on', on)
+  const label = btn.querySelector('[data-today-label]')
+  if (label) label.textContent = on ? '已排入今日餐點 · 點擊移出' : '加入今日餐點'
 }
 
 // ---------- 快捷操作 ----------
@@ -614,6 +623,7 @@ export function initUI(): void {
   document.addEventListener('tj:state', () => {
     refreshChefButtons()
     updateBadge()
+    refreshTodayButton()
   })
 
   refreshAuthChip()
