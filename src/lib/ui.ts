@@ -298,10 +298,6 @@ function buildModal(r: Recipe): void {
             </div>
           </div>
 
-          <button class="today-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" data-today-btn>
-            ${ic('chef', 18)}<span data-today-label>${state.inToday(r.slug) ? '已排入今日餐點 · 點擊移出' : '加入今日餐點'}</span>
-          </button>
-
           <div class="card !shadow-none flex items-center justify-between px-4 py-3 bg-cream/60">
             <div class="text-sm text-soft leading-relaxed">調整用餐人數<br><span class="text-xs text-faint">食材會即時換算</span></div>
             <div class="flex items-center gap-3">
@@ -396,16 +392,6 @@ export function syncModalFromHash(): void {
     }
   }
   closeModal()
-}
-
-/** 詳情頁的「加入今日餐點」按鈕狀態刷新 */
-function refreshTodayButton(): void {
-  const btn = document.querySelector<HTMLElement>('[data-today-btn]')
-  if (!btn || !currentRecipe) return
-  const on = state.inToday(currentRecipe.slug)
-  btn.classList.toggle('is-on', on)
-  const label = btn.querySelector('[data-today-label]')
-  if (label) label.textContent = on ? '已排入今日餐點 · 點擊移出' : '加入今日餐點'
 }
 
 // ---------- 快捷操作 ----------
@@ -624,7 +610,6 @@ export function initUI(): void {
   document.addEventListener('tj:state', () => {
     refreshChefButtons()
     updateBadge()
-    refreshTodayButton()
   })
 
   refreshAuthChip()
