@@ -13,9 +13,7 @@ const recipes = await loadAllRecipes()
       <h2 class="flex items-center gap-2 text-lg font-bold">
         <span class="text-accent-deep"><Icon name="chef" size={20} /></span>
         今日餐點
-        <span id="today-date" class="text-sm font-normal text-faint"></span>
       </h2>
-      <span class="text-xs text-faint">打開食譜即可排入</span>
     </div>
     <div id="today-list" class="grid gap-3 sm:grid-cols-2">
       <div class="skeleton h-20"></div>
@@ -79,12 +77,6 @@ const recipes = await loadAllRecipes()
       .map((slug) => all.find((r) => r.slug === slug))
       .filter((r): r is NonNullable<typeof r> => !!r)
 
-    const label = document.getElementById('today-date')
-    if (label && menu.date) {
-      const d = new Date(`${menu.date}T00:00:00`)
-      const wd = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()]
-      label.textContent = `${d.getMonth() + 1} 月 ${d.getDate()} 日（${wd}）`
-    }
     listEl.innerHTML =
       list.length === 0
         ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，點開食譜就能加入</div>`
