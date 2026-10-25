@@ -276,6 +276,7 @@ function buildModal(r: Recipe): void {
       <div class="relative shrink-0">
         ${photo}
         <div class="absolute top-3 right-3 flex gap-2">
+          <button class="quick-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" title="加入／移出今日餐點" aria-label="加入今日餐點">${ic('chef', 16)}</button>
           <button class="quick-btn" data-action="edit-recipe" data-slug="${esc(r.slug)}" title="編輯食譜">${ic('pencil', 15)}</button>
           <button class="quick-btn" data-action="delete-recipe" data-slug="${esc(r.slug)}" title="刪除食譜">${ic('trash', 15)}</button>
           <button class="quick-btn" data-action="close-modal" title="關閉">${ic('x', 16)}</button>
