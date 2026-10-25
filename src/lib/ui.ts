@@ -32,6 +32,11 @@ export function photoUrl(r: Recipe, thumb: boolean): string {
   return ''
 }
 
+/** 數字轉全形（人份等混排文字中更有雜誌感） */
+export function fw(n: number): string {
+  return String(n).replace(/\d/g, (d) => '０１２３４５６７８９'[Number(d)])
+}
+
 // ---------- 全域狀態 ----------
 
 declare global {
@@ -293,16 +298,16 @@ function buildModal(r: Recipe): void {
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14px]">
               ${r.time ? `<span class="inline-flex items-center gap-1.5 text-soft">${ic('clock', 15)} 約 ${esc(String(r.time))} 分鐘</span>` : ''}
-              <span class="inline-flex items-center gap-1.5 text-soft">${ic('user', 15)} 基準 ${esc(String(r.servings))} 人份</span>
+              <span class="inline-flex items-center gap-1.5 text-soft">${ic('user', 15)} ${fw(r.servings)} 人份</span>
               ${r.source ? `<span class="inline-flex items-center gap-1.5">${ic('link', 15)} ${sourceHtml(r)}</span>` : ''}
             </div>
           </div>
 
           <div class="card !shadow-none flex items-center justify-between px-4 py-3 bg-cream/60">
-            <div class="text-sm text-soft leading-relaxed">調整用餐人數<br><span class="text-xs text-faint">食材會即時換算</span></div>
+            <div class="text-sm text-soft">用餐人數</div>
             <div class="flex items-center gap-3">
               <button class="quick-btn" data-action="servings-dec" title="減少人數" aria-label="減少人數">${ic('minus', 16)}</button>
-              <span class="font-bold text-accent-deep min-w-[4.5rem] text-center" data-servings>${currentServings} 人份</span>
+              <span class="font-bold text-accent-deep min-w-[4.5rem] text-center" data-servings>${fw(currentServings)} 人份</span>
               <button class="quick-btn" data-action="servings-inc" title="增加人數" aria-label="增加人數">${ic('plus', 16)}</button>
             </div>
           </div>
@@ -336,7 +341,7 @@ function refreshModal(): void {
     if (checked.has(`${c.dataset.section}:${c.dataset.idx}`)) c.checked = true
   })
   const s = document.querySelector('[data-servings]')
-  if (s) s.textContent = `${currentServings} 人份`
+  if (s) s.textContent = `${fw(currentServings)} 人份`
   updateIngCount()
 }
 
