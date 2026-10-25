@@ -15,7 +15,7 @@ const recipes = await loadAllRecipes()
         今日餐點
       </h2>
     </div>
-    <div id="today-list" class="grid gap-3 sm:grid-cols-2">
+    <div id="today-list" class="grid grid-cols-2 gap-2.5 sm:gap-3">
       <div class="skeleton h-20"></div>
       <div class="skeleton h-20 hidden sm:block"></div>
     </div>
@@ -31,7 +31,7 @@ const recipes = await loadAllRecipes()
       </div>
     </div>
 
-    <div id="recipe-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div id="recipe-grid" class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
       {recipes.map((r) => <RecipeCard recipe={r} />)}
     </div>
   </section>
@@ -79,7 +79,7 @@ const recipes = await loadAllRecipes()
 
     listEl.innerHTML =
       list.length === 0
-        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，點開食譜就能加入</div>`
+        ? `<div class="col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，點開食譜就能加入</div>`
         : list.map(todayCardHtml).join('')
   }
 
@@ -96,7 +96,7 @@ const recipes = await loadAllRecipes()
     $grid().innerHTML =
       list.length > 0
         ? list.map(recipeCardHtml).join('')
-        : `<div class="sm:col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">還沒有任何食譜<br><a href="/edit" class="text-accent-deep underline decoration-accent-soft underline-offset-4 mt-2 inline-block">新增第一道 ${ic('plus', 13)}</a></div>`
+        : `<div class="col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">還沒有任何食譜<br><a href="/edit" class="text-accent-deep underline decoration-accent-soft underline-offset-4 mt-2 inline-block">新增第一道 ${ic('plus', 13)}</a></div>`
   }
 
   function bind() {
