@@ -1,0 +1,16 @@
+{
+  "name": "味覺手帳 Taste Journal",
+  "short_name": "味覺手帳",
+  "description": "溫潤的個人食譜手帳",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6EF",
+  "theme_color": "#FAF6EF",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

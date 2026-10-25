@@ -1,0 +1,172 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Icon from '../components/Icon.astro'
+---
+<Layout title="採買清單">
+  <div class="flex items-end justify-between mb-1 px-1">
+    <h2 class="flex items-center gap-2 text-lg font-bold">
+      <span class="text-accent-deep"><Icon name="basket" size={19} /></span>
+      採買清單
+    </h2>
+    <div class="flex gap-2">
+      <button id="btn-clear-done" class="btn-ghost !py-1.5 !px-3.5 text-sm">清空已完成</button>
+      <button id="btn-clear-all" class="btn-ghost !py-1.5 !px-3.5 text-sm !text-warn">清空全部</button>
+    </div>
+  </div>
+  <p class="text-xs text-faint mb-4 px-1">從食譜加入的食材會自動彙總，同單位自動加總</p>
+
+  {/* 手動新增 */}
+  <div class="flex gap-2 mb-5">
+    <input
+      id="custom-input"
+      class="field !rounded-full"
+      placeholder="手動新增項目（例如：洗潔精）"
+      autocomplete="off"
+    />
+    <button id="btn-add-custom" class="btn-accent !px-5 shrink-0" aria-label="新增項目">
+      <Icon name="plus" size={18} />
+    </button>
+  </div>
+
+  {/* 清單 */}
+  <div id="shopping-list" class="grid gap-2.5">
+    <div class="skeleton h-16"></div>
+    <div class="skeleton h-16"></div>
+    <div class="skeleton h-16"></div>
+  </div>
+</Layout>
+
+<script>
+  import * as state from '../lib/state'
+  import { ic, esc, sp, toast, requireAuth, confirmDialog } from '../lib/ui'
+  import { formatQty } from '../lib/parser'
+  import type { ShoppingItem } from '../lib/types'
+
+  function qtyText(item: ShoppingItem): string {
+    if (item.qty != null) {
+      const unit = item.unit ?? ''
+      return (formatQty(item.qty, item.unit) + (unit ? ' ' + unit : '')).trim()
+    }
+    return item.qtyText ?? ''
+  }
+
+  function render() {
+    const listEl = document.getElementById('shopping-list')
+    if (!listEl) return
+    // 未完成的排前面，勾過的排後面（各自維持原順序）
+    const items = [...state.snapshot().shopping.items]
+    items.sort((a, b) => Number(a.checked) - Number(b.checked))
+
+    if (items.length === 0) {
+      listEl.innerHTML = `
+        <div class="text-center py-12 border-2 border-dashed border-line rounded-3xl text-soft">
+          <div class="flex justify-center mb-3 text-faint">${ic('basket', 44)}</div>
+          <p class="font-medium">採買清單空空的</p>
+          <p class="text-sm mt-1.5">打開食譜，把食材「全部加入」或勾選後「加入選取」</p>
+          <a href="/search" class="btn-accent !py-2 text-sm mt-4">去找食譜 ${ic('search', 14)}</a>
+        </div>`
+      return
+    }
+
+    listEl.innerHTML = items
+      .map(
+        (item) => `
+      <div class="card !shadow-none flex items-center gap-3 px-4 py-3 ${item.checked ? 'opacity-50' : ''}">
+        <button
+          class="shrink-0 w-[26px] h-[26px] rounded-full border-2 flex items-center justify-center transition-colors"
+          style="${item.checked
+            ? 'background:var(--color-leaf);border-color:var(--color-leaf);color:#fff'
+            : 'border-color:var(--color-line);color:transparent'}"
+          data-check="${esc(item.id)}"
+          title="${item.checked ? '取消勾選' : '標記已購買'}"
+        >${ic('check', 15)}</button>
+        <div class="flex-1 min-w-0">
+          <p class="font-medium leading-snug ${item.checked ? 'line-through text-faint' : ''}">
+            ${esc(sp(item.name))}
+            ${qtyText(item) ? `<span class="text-soft font-normal text-sm ml-1">${esc(sp(qtyText(item)))}</span>` : ''}
+          </p>
+          ${
+            item.sources.length > 0
+              ? `<div class="flex flex-wrap gap-1 mt-1.5">${item.sources
+                  .map((s) => `<span class="text-[11px] leading-none px-2 py-1 rounded-full bg-cream text-faint">${esc(s)}</span>`)
+                  .join('')}</div>`
+              : ''
+          }
+        </div>
+        <button class="quick-btn !w-8 !h-8 shrink-0" data-remove="${esc(item.id)}" title="刪除項目">
+          ${ic('trash', 14)}
+        </button>
+      </div>`,
+      )
+      .join('')
+  }
+
+  function refresh() {
+    render()
+    document.dispatchEvent(new CustomEvent('tj:state'))
+  }
+
+  document.addEventListener('tj:ready', () => {
+    render()
+
+    document.getElementById('shopping-list')?.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('[data-check]') as HTMLElement | null
+      if (btn) {
+        if (!requireAuth('更新採買清單')) return
+        state.toggleShoppingItem(btn.dataset.check!)
+        refresh()
+        return
+      }
+      const rm = (e.target as HTMLElement).closest('[data-remove]') as HTMLElement | null
+      if (rm) {
+        state.removeShoppingItem(rm.dataset.remove!)
+        refresh()
+      }
+    })
+
+    const customInput = document.getElementById('custom-input') as HTMLInputElement | null
+    const addCustom = () => {
+      if (!customInput) return
+      const name = customInput.value.trim()
+      if (!name) return
+      if (!requireAuth('新增採買項目')) return
+      state.addCustomItem(name)
+      customInput.value = ''
+      refresh()
+    }
+    document.getElementById('btn-add-custom')?.addEventListener('click', addCustom)
+    customInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addCustom()
+    })
+
+    document.getElementById('btn-clear-done')?.addEventListener('click', async () => {
+      const done = state.snapshot().shopping.items.filter((i) => i.checked).length
+      if (done === 0) return toast('沒有已完成的項目', 'info')
+      const ok = await confirmDialog({
+        title: '清空已完成項目',
+        message: `要把 ${done} 項已完成的項目從清單移除嗎？`,
+        confirmText: '清空已完成',
+      })
+      if (!ok) return
+      state.clearDoneItems()
+      refresh()
+    })
+
+    document.getElementById('btn-clear-all')?.addEventListener('click', async () => {
+      const n = state.snapshot().shopping.items.length
+      if (n === 0) return
+      const ok = await confirmDialog({
+        title: '清空全部清單',
+        message: `確定要把清單裡的 ${n} 個項目全部清掉嗎？\n這個動作無法復原。`,
+        confirmText: '全部清空',
+        danger: true,
+      })
+      if (!ok) return
+      state.clearAllItems()
+      refresh()
+    })
+
+    // 別的分頁（食譜 Modal）加入食材後，這頁也要同步更新
+    document.addEventListener('tj:state', render)
+  })
+</script>

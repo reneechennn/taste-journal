@@ -1,0 +1,139 @@
+---
+import Layout from '../layouts/Layout.astro'
+import RecipeCard from '../components/RecipeCard.astro'
+import Icon from '../components/Icon.astro'
+import { loadAllRecipes } from '../lib/parseCollection'
+import { CATEGORIES } from '../lib/types'
+
+const recipes = await loadAllRecipes()
+---
+<Layout>
+  {/* ---------- 區塊一：今日餐點 ---------- */}
+  <section aria-label="今日餐點" class="mb-10">
+    <div class="flex items-end justify-between mb-3 px-1">
+      <h2 class="flex items-center gap-2 text-lg font-bold">
+        <span class="text-accent-deep"><Icon name="chef" size={20} /></span>
+        今日餐點
+        <span id="today-date" class="text-sm font-normal text-faint"></span>
+      </h2>
+      <span class="text-xs text-faint">點 <span class="text-accent-deep"><Icon name="chef" size={13} /></span> 加入食譜</span>
+    </div>
+    <div id="today-list" class="grid gap-3 sm:grid-cols-2">
+      <div class="skeleton h-20"></div>
+      <div class="skeleton h-20 hidden sm:block"></div>
+    </div>
+  </section>
+
+  {/* ---------- 區塊二：食譜列表 ---------- */}
+  <section aria-label="食譜列表">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3 px-1">
+      <h2 class="text-lg font-bold">食譜列表</h2>
+      <div class="flex items-center gap-2">
+        <a href="/edit" class="btn-accent !py-1.5 !px-4 text-sm">
+          <Icon name="plus" size={15} /> 新增食譜
+        </a>
+      </div>
+    </div>
+
+    {/* 排序切換 */}
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <button class="chip is-on" data-mode="recent" id="mode-recent">最近新增</button>
+      <button class="chip" data-mode="cooked" id="mode-cooked">經常烹調</button>
+      <span class="hidden sm:block w-px h-5 bg-line mx-1"></span>
+      <div class="flex gap-2 overflow-x-auto flex-1 min-w-0 pb-0.5 -mx-1 px-1" id="cat-chips">
+        <button class="chip is-on" data-cat="">全部</button>
+        {CATEGORIES.map((c) => <button class="chip" data-cat={c}>{c}</button>)}
+      </div>
+    </div>
+
+    <div id="recipe-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {recipes.map((r) => <RecipeCard recipe={r} />)}
+    </div>
+  </section>
+
+  {/* 食譜資料島（前端互動用） */}
+  <script
+    type="application/json"
+    id="recipes-data"
+    set:html={JSON.stringify(recipes).replace(/</g, '\\u003c')}
+  />
+</Layout>
+
+<script>
+  import { getRecipes, recipeCardHtml, todayCardHtml, ic, esc, sp } from '../lib/ui'
+  import * as state from '../lib/state'
+
+  let mode: 'recent' | 'cooked' = 'recent'
+  let cat = ''
+
+  const $grid = () => document.getElementById('recipe-grid')!
+
+  function renderToday() {
+    const listEl = document.getElementById('today-list')
+    if (!listEl) return
+    const { menu } = state.snapshot()
+    const all = getRecipes()
+    const list = menu.recipes
+      .map((slug) => all.find((r) => r.slug === slug))
+      .filter((r): r is NonNullable<typeof r> => !!r)
+
+    const label = document.getElementById('today-date')
+    if (label && menu.date) {
+      const d = new Date(`${menu.date}T00:00:00`)
+      const wd = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()]
+      label.textContent = `${d.getMonth() + 1} 月 ${d.getDate()} 日（${wd}）`
+    }
+    listEl.innerHTML =
+      list.length === 0
+        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，從下面挑幾道吧 ${ic('chef', 16)}</div>`
+        : list.map(todayCardHtml).join('')
+  }
+
+  function renderGrid() {
+    let list = [...getRecipes()]
+    if (cat) list = list.filter((r) => r.category === cat)
+    if (mode === 'cooked') {
+      const counts = state.snapshot().counts
+      list.sort(
+        (a, b) =>
+          (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0) ||
+          (b.createdAt ?? '').localeCompare(a.createdAt ?? ''),
+      )
+    }
+    $grid().innerHTML =
+      list.length > 0
+        ? list.map(recipeCardHtml).join('')
+        : `<div class="sm:col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">這個分類還沒有食譜<br><a href="/edit" class="text-accent-deep underline decoration-accent-soft underline-offset-4 mt-2 inline-block">新增一道 ${ic('plus', 13)}</a></div>`
+  }
+
+  function bind() {
+    document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        mode = btn.dataset.mode as 'recent' | 'cooked'
+        document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('is-on', b === btn))
+        renderGrid()
+      })
+    })
+    document.querySelectorAll<HTMLButtonElement>('#cat-chips [data-cat]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        cat = btn.dataset.cat ?? ''
+        document
+          .querySelectorAll('#cat-chips [data-cat]')
+          .forEach((b) => b.classList.toggle('is-on', b === btn))
+        renderGrid()
+      })
+    })
+  }
+
+  function onState() {
+    renderToday()
+    if (mode === 'cooked') renderGrid()
+  }
+
+  document.addEventListener('tj:ready', () => {
+    renderToday()
+    renderGrid()
+    bind()
+    document.addEventListener('tj:state', onState)
+  })
+</script>

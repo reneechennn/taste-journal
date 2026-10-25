@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Icon from '../components/Icon.astro'
+---
+<Layout title="找不到頁面">
+  <div class="text-center py-20">
+    <div class="flex justify-center text-faint mb-4"><Icon name="search" size={44} /></div>
+    <h1 class="text-xl font-bold mb-2">這頁被吃掉了</h1>
+    <p class="text-soft text-sm mb-6">找不到你想找的頁面，可能已經被刪除或網址打錯了</p>
+    <a href="/" class="btn-accent">回首頁</a>
+  </div>
+</Layout>

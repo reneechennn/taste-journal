@@ -1,0 +1,50 @@
+---
+import Icon from './Icon.astro'
+import type { Recipe } from '../lib/types'
+import { sp } from '../lib/parser'
+
+interface Props {
+  recipe: Recipe
+}
+const { recipe: r } = Astro.props
+const url = (r.photoThumb && `/photos/thumbs/${encodeURIComponent(r.photoThumb)}`) || (r.photo && `/photos/${encodeURIComponent(r.photo)}`) || ''
+---
+<article class="card overflow-hidden relative flex flex-col">
+  <div class="absolute top-3 right-3 z-10 flex gap-2">
+    <button class="quick-btn" data-action="toggle-today" data-slug={r.slug} title="加入／移出今日餐點" aria-label="加入今日餐點">
+      <Icon name="chef" size={18} />
+    </button>
+    <button class="quick-btn" data-action="edit-recipe" data-slug={r.slug} title="編輯食譜" aria-label="編輯食譜">
+      <Icon name="pencil" size={16} />
+    </button>
+    <button class="quick-btn" data-action="delete-recipe" data-slug={r.slug} title="刪除食譜" aria-label="刪除食譜">
+      <Icon name="trash" size={16} />
+    </button>
+  </div>
+  <div class="cursor-pointer flex flex-col flex-1" data-action="open-recipe" data-slug={r.slug}>
+    {
+      url ? (
+        <img src={url} alt={r.title} loading="lazy" class="w-full aspect-[4/3] object-cover" />
+      ) : (
+        <div class="w-full aspect-[4/3] bg-cream flex items-center justify-center text-faint">
+          <Icon name="image" size={40} />
+        </div>
+      )
+    }
+    <div class="p-4 md:p-5 flex flex-col flex-1">
+      <h3 class="text-[17px] leading-snug font-bold">{sp(r.title)}</h3>
+      {
+        r.time ? (
+          <div class="mt-1.5 flex items-center gap-1.5 text-sm text-soft">
+            <Icon name="clock" size={14} />
+            約 {r.time} 分鐘
+          </div>
+        ) : null
+      }
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        <span class="pill pill-type">{r.type}</span>
+        <span class="pill pill-cuisine">{r.cuisine}</span>
+      </div>
+    </div>
+  </div>
+</article>

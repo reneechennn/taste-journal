@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro'
+
+const path = Astro.url.pathname
+const tabs = [
+  { href: '/', label: '首頁', icon: 'home' },
+  { href: '/search', label: '搜尋', icon: 'search' },
+  { href: '/shopping', label: '採買', icon: 'basket' },
+]
+const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
+---
+{/* 手機／平板：底部固定 Tab Bar（App 感） */}
+<nav
+  class="md:hidden fixed inset-x-0 bottom-0 z-40 bg-paper/95 backdrop-blur border-t border-line"
+  style="padding-bottom:env(safe-area-inset-bottom)"
+  aria-label="主導覽"
+>
+  <div class="grid grid-cols-3 max-w-lg mx-auto">
+    {
+      tabs.map((t) => (
+        <a
+          href={t.href}
+          class:list={[
+            'relative flex flex-col items-center gap-1 py-2.5 text-[13px] font-medium transition-colors',
+            active(t.href) ? 'text-accent-deep' : 'text-faint',
+          ]}
+          aria-current={active(t.href) ? 'page' : undefined}
+        >
+          {t.href === '/shopping' && (
+            <span id="tab-badge" class="hidden absolute top-1 right-[24%] min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[11px] leading-[18px] text-center" />
+          )}
+          <Icon name={t.icon} size={22} />
+          {t.label}
+        </a>
+      ))
+    }
+  </div>
+</nav>
+
+{/* 桌機：頂部導覽（放在 header，由 Layout 引用同一份定義） */}

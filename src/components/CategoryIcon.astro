@@ -1,0 +1,23 @@
+---
+interface Props {
+  category: string
+  size?: number
+  class?: string
+}
+const { category, size = 30, class: cls = '' } = Astro.props
+
+const MAP: Record<string, string> = {
+  牛肉: 'cat-beef',
+  雞肉: 'cat-chicken',
+  豬肉: 'cat-pork',
+  魚類: 'cat-fish',
+  海鮮: 'cat-seafood',
+  蛋: 'cat-egg',
+  蔬菜: 'cat-veg',
+  其他: 'cat-other',
+}
+const symbol = MAP[category] ?? 'cat-other'
+---
+<svg class={`ic ${cls}`} style={`width:${size}px;height:${size}px`} aria-hidden="true">
+  <use href={`#i-${symbol}`}></use>
+</svg>

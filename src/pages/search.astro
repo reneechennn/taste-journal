@@ -1,0 +1,217 @@
+---
+import Layout from '../layouts/Layout.astro'
+import RecipeCard from '../components/RecipeCard.astro'
+import Icon from '../components/Icon.astro'
+import CategoryIcon from '../components/CategoryIcon.astro'
+import { loadAllRecipes } from '../lib/parseCollection'
+import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
+
+const recipes = await loadAllRecipes()
+---
+<Layout title="搜尋食譜">
+  {/* 搜尋列 */}
+  <div class="relative mb-4">
+    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-faint"><Icon name="search" size={18} /></span>
+    <input
+      id="search-input"
+      type="search"
+      class="field !rounded-full !pl-11"
+      placeholder="搜尋菜名、食材、標籤（可多關鍵字）"
+      autocomplete="off"
+    />
+  </div>
+
+  {/* 餐點類型 Pills */}
+  <div class="flex gap-2 overflow-x-auto flex-nowrap -mx-1 px-1 pb-1 mb-3" id="type-pills">
+    <button class="chip is-on" data-type="全部">全部</button>
+    {MEAL_TYPES.map((t) => <button class="chip" data-type={t}>{t}</button>)}
+  </div>
+
+  {/* 菜系 Dropdown */}
+  <div class="flex items-center justify-between mb-5">
+    <label class="flex items-center gap-2 text-sm text-soft">
+      菜系
+      <select id="cuisine-select" class="field !w-auto !py-1.5 !pr-8 text-[15px]">
+        <option value="全部">全部</option>
+        {CUISINES.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </label>
+    <span class="text-xs text-faint">共 <b id="result-count" class="text-soft">{recipes.length}</b> 道</span>
+  </div>
+
+  {/* 8 大料理分類 */}
+  <section aria-label="料理分類" class="mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="cat-grid">
+      {
+        CATEGORIES.map((c) => (
+          <button class="cat-card" data-category={c}>
+            <CategoryIcon category={c} size={30} />
+            <span>{c}料理</span>
+          </button>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* 搜尋結果 */}
+  <section aria-label="搜尋結果">
+    <div class="relative mb-3 px-1">
+      <h2 id="results-title" class="text-lg font-bold pr-24">全部食譜</h2>
+      <button
+        id="clear-filters"
+        class="absolute top-1/2 -translate-y-1/2 right-0 flex items-center gap-1.5 text-sm text-accent-deep bg-accent-soft rounded-full px-3.5 py-1.5 hover:bg-accent hover:text-white transition-colors"
+      >
+        <Icon name="rotate" size={15} />
+        清除篩選
+      </button>
+    </div>
+    <div id="recipe-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {recipes.map((r) => <RecipeCard recipe={r} />)}
+    </div>
+  </section>
+
+  <script
+    type="application/json"
+    id="recipes-data"
+    set:html={JSON.stringify(recipes).replace(/</g, '\\u003c')}
+  />
+</Layout>
+
+<style>
+  .cat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    color: var(--color-soft);
+    cursor: pointer;
+    transition: all 0.16s ease;
+    box-shadow: 0 10px 24px -18px rgba(97, 78, 55, 0.3);
+  }
+  .cat-card:hover {
+    background: var(--color-cream);
+    transform: translateY(-2px);
+  }
+  .cat-card.is-on {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+    box-shadow: 0 10px 22px -12px rgba(194, 112, 75, 0.55);
+  }
+</style>
+
+<script>
+  import { getRecipes, recipeCardHtml, ic } from '../lib/ui'
+
+  const filters = { q: '', type: '全部', cuisine: '全部', category: '' }
+
+  /** 全形轉半形＋小寫，讓搜尋更寬容 */
+  function normalize(s: string): string {
+    return s
+      .toLowerCase()
+      .replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+      .replace(/\s+/g, ' ')
+  }
+
+  function render() {
+    let list = [...getRecipes()]
+    if (filters.category) list = list.filter((r) => r.category === filters.category)
+    if (filters.type !== '全部') list = list.filter((r) => r.type === filters.type)
+    if (filters.cuisine !== '全部') list = list.filter((r) => r.cuisine === filters.cuisine)
+    if (filters.q.trim()) {
+      const kws = normalize(filters.q).split(' ').filter(Boolean)
+      const hayOf = (r: (typeof list)[number]) =>
+        normalize(
+          [
+            r.title,
+            r.category,
+            r.type,
+            r.cuisine,
+            ...r.ingredients.map((l) => l.name),
+            ...r.marinades.map((l) => l.name),
+            ...r.seasonings.map((l) => l.name),
+          ].join(' '),
+        )
+      list = list.filter((r) => kws.every((k) => hayOf(r).includes(k)))
+    }
+
+    const title = document.getElementById('results-title')!
+    title.textContent = filters.category
+      ? filters.category === '其他'
+        ? '其他料理'
+        : `${filters.category}料理`
+      : '全部食譜'
+
+    document.getElementById('result-count')!.textContent = String(list.length)
+
+    document.getElementById('recipe-grid')!.innerHTML =
+      list.length > 0
+        ? list.map(recipeCardHtml).join('')
+        : `<div class="sm:col-span-2 lg:col-span-3 text-center text-soft py-10 border-2 border-dashed border-line rounded-2xl">
+            <div class="text-3xl mb-2">${ic('search', 34)}</div>
+            找不到符合的食譜<br>
+            <span class="text-sm text-faint mt-1 inline-block">試試放寬條件，或點右上角「清除篩選」</span>
+          </div>`
+  }
+
+  function clearAll() {
+    filters.q = ''
+    filters.type = '全部'
+    filters.cuisine = '全部'
+    filters.category = ''
+    const input = document.getElementById('search-input') as HTMLInputElement | null
+    if (input) input.value = ''
+    const select = document.getElementById('cuisine-select') as HTMLSelectElement | null
+    if (select) select.value = '全部'
+    document.querySelectorAll<HTMLButtonElement>('#type-pills [data-type]').forEach((b) =>
+      b.classList.toggle('is-on', b.dataset.type === '全部'),
+    )
+    document.querySelectorAll<HTMLButtonElement>('#cat-grid [data-category]').forEach((b) =>
+      b.classList.remove('is-on'),
+    )
+    render()
+  }
+
+  document.addEventListener('tj:ready', () => {
+    let debounce: ReturnType<typeof setTimeout> | null = null
+    document.getElementById('search-input')?.addEventListener('input', (e) => {
+      filters.q = (e.target as HTMLInputElement).value
+      if (debounce) clearTimeout(debounce)
+      debounce = setTimeout(render, 220)
+    })
+
+    document.querySelectorAll<HTMLButtonElement>('#type-pills [data-type]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filters.type = btn.dataset.type ?? '全部'
+        document
+          .querySelectorAll('#type-pills [data-type]')
+          .forEach((b) => b.classList.toggle('is-on', b === btn))
+        render()
+      })
+    })
+
+    document.getElementById('cuisine-select')?.addEventListener('change', (e) => {
+      filters.cuisine = (e.target as HTMLSelectElement).value
+      render()
+    })
+
+    // 點分類卡片進入該類；再點同一張 = 取消
+    document.querySelectorAll<HTMLButtonElement>('#cat-grid [data-category]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const c = btn.dataset.category ?? ''
+        filters.category = filters.category === c ? '' : c
+        document
+          .querySelectorAll('#cat-grid [data-category]')
+          .forEach((b) => b.classList.toggle('is-on', b.dataset.category === filters.category))
+        render()
+      })
+    })
+
+    document.getElementById('clear-filters')?.addEventListener('click', clearAll)
+    render()
+  })
+</script>

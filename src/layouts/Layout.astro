@@ -1,0 +1,92 @@
+---
+import '../styles/global.css'
+import Icon from '../components/Icon.astro'
+import IconSprite from '../components/IconSprite.astro'
+import TabBar from '../components/TabBar.astro'
+
+interface Props {
+  title?: string
+  description?: string
+}
+const { title = '味覺手帳', description = '溫潤的個人食譜手帳：今日餐點、食譜收藏與採買清單。' } = Astro.props
+
+const path = Astro.url.pathname
+const tabs = [
+  { href: '/', label: '首頁' },
+  { href: '/search', label: '搜尋' },
+  { href: '/shopping', label: '採買清單' },
+]
+const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
+---
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#FAF6EF" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title === '味覺手帳' ? '味覺手帳 Taste Journal' : `${title} · 味覺手帳`}</title>
+  </head>
+  <body>
+    <IconSprite />
+
+    <header class="relative z-10 max-w-5xl mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-3 flex items-center justify-between gap-3">
+      <a href="/" class="flex items-center gap-2.5 group">
+        <span class="w-10 h-10 rounded-2xl bg-cream border border-line flex items-center justify-center text-accent-deep shrink-0 group-hover:rotate-6 transition-transform">
+          <Icon name="basket" size={20} />
+        </span>
+        <span>
+          <span class="block text-xl md:text-2xl font-bold leading-tight">味覺手帳</span>
+          <span class="block text-[10px] tracking-[0.35em] text-faint">TASTE JOURNAL</span>
+        </span>
+      </a>
+      <div class="flex items-center gap-2 md:gap-3">
+        <nav class="hidden md:flex items-center gap-1 bg-card border border-line rounded-full p-1" aria-label="主導覽">
+          {
+            tabs.map((t) => (
+              <a
+                href={t.href}
+                class:list={[
+                  'px-4 py-1.5 rounded-full text-[15px] transition-colors',
+                  active(t.href) ? 'bg-accent text-white' : 'text-soft hover:bg-cream',
+                ]}
+                aria-current={active(t.href) ? 'page' : undefined}
+              >
+                {t.label}
+              </a>
+            ))
+          }
+        </nav>
+        <button id="auth-chip" data-action="login" class="chip !text-[13px]">
+          <Icon name="login" size={15} />
+          登入
+        </button>
+      </div>
+    </header>
+
+    <main class="relative z-[1] max-w-5xl mx-auto px-4 md:px-6 pt-2 md:pt-4 pb-28 md:pb-16 min-h-[60vh]">
+      <slot />
+    </main>
+
+    <TabBar />
+
+    <div id="modal-root"></div>
+    <div id="confirm-root"></div>
+    <div id="toast-root" class="fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-8 z-[80] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+    <script>
+      import { initUI } from '../lib/ui'
+      initUI()
+    </script>
+  </body>
+</html>

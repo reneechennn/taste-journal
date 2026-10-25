@@ -1,0 +1,423 @@
+---
+import Icon from './Icon.astro'
+import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
+---
+<div id="edit-root" class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-1">
+    <a href="/" class="btn-ghost !py-1.5 !px-4 text-sm">
+      <Icon name="x" size={15} /> 取消
+    </a>
+    <h1 id="form-title" class="text-lg font-bold">新增食譜</h1>
+    <span class="w-[76px]"></span>
+  </div>
+  <p class="text-xs text-faint px-1 mb-4">儲存後網站需要 1-2 分鐘更新</p>
+
+  <div id="auth-banner" class="hidden card !shadow-none bg-accent-soft/60 border-accent-soft p-4 mb-4 flex items-center justify-between gap-3">
+    <p class="text-sm text-accent-deep">儲存食譜前需要先登入 GitHub（這台裝置只需一次）</p>
+    <button id="banner-login" class="btn-accent !py-1.5 shrink-0">登入</button>
+  </div>
+
+  <div class="card p-5 md:p-7 space-y-6">
+    {/* 菜名 */}
+    <label class="block">
+      <span class="block mb-1.5 text-sm font-bold text-soft">菜名 <b class="text-accent">*</b></span>
+      <input id="f-title" class="field" placeholder="例如：番茄燉雞腿" maxlength="40" />
+    </label>
+
+    {/* 照片 */}
+    <div>
+      <span class="block mb-1.5 text-sm font-bold text-soft">照片 <span class="font-normal text-faint">（每道 1 張，會自動壓縮）</span></span>
+      <button id="photo-zone" type="button" class="w-full border-2 border-dashed border-line rounded-2xl py-6 flex flex-col items-center gap-2 text-faint hover:border-accent hover:text-accent transition-colors">
+        <span id="photo-icon" class="text-faint"><Icon name="image" size={34} /></span>
+        <img id="photo-preview" alt="照片預覽" class="hidden w-full max-w-[16rem] rounded-xl aspect-[4/3] object-cover" />
+        <span id="photo-hint" class="text-sm">點擊選擇照片</span>
+      </button>
+      <input type="file" id="f-photo" accept="image/*" class="hidden" />
+    </div>
+
+    {/* 分類三選一 + 屬性 */}
+    <div class="grid sm:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">料理分類 <b class="text-accent">*</b></span>
+        <select id="f-category" class="field">
+          <option value="">請選擇…</option>
+          {CATEGORIES.map((c) => <option value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">餐點類型 <b class="text-accent">*</b></span>
+        <select id="f-type" class="field">
+          <option value="">請選擇…</option>
+          {MEAL_TYPES.map((t) => <option value={t}>{t}</option>)}
+        </select>
+      </label>
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">菜系 <b class="text-accent">*</b></span>
+        <select id="f-cuisine" class="field">
+          <option value="">請選擇…</option>
+          {CUISINES.map((c) => <option value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">烹調時間</span>
+        <div class="flex items-center gap-2">
+          <input id="f-time" type="number" min="1" max="600" class="field" placeholder="45" />
+          <span class="text-soft text-sm shrink-0">分鐘</span>
+        </div>
+      </label>
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">食用人數（基準）</span>
+        <div class="flex items-center gap-2">
+          <input id="f-servings" type="number" min="1" max="99" class="field" placeholder="4" value="4" />
+          <span class="text-soft text-sm shrink-0">人份</span>
+        </div>
+      </label>
+      <label class="block">
+        <span class="block mb-1.5 text-sm font-bold text-soft">食譜來源</span>
+        <input id="f-source" class="field" placeholder="網址，或「MASA食譜 P.99」" />
+      </label>
+    </div>
+
+    {/* 主食材 */}
+    <div>
+      <span class="block mb-1.5 text-sm font-bold text-soft">主食材 <b class="text-accent">*</b></span>
+      <textarea id="f-main" class="field" rows="5" placeholder="一行一項，例如：&#10;雞腿 2 隻&#10;牛番茄 3 顆&#10;鹽 少許"></textarea>
+      <div id="pv-main" class="mt-2.5 flex flex-wrap gap-1.5" aria-live="polite"></div>
+    </div>
+
+    {/* 醃料 */}
+    <div>
+      <span class="block mb-1.5 text-sm font-bold text-soft">醃料 <span class="font-normal text-faint">（沒有可留空）</span></span>
+      <textarea id="f-marinade" class="field" rows="3" placeholder="一行一項，例如：&#10;鹽 1 小匙&#10;黑胡椒 少許"></textarea>
+      <div id="pv-marinade" class="mt-2.5 flex flex-wrap gap-1.5" aria-live="polite"></div>
+    </div>
+
+    {/* 調味料 */}
+    <div>
+      <span class="block mb-1.5 text-sm font-bold text-soft">調味料 <span class="font-normal text-faint">（沒有可留空）</span></span>
+      <textarea id="f-seasoning" class="field" rows="3" placeholder="一行一項，例如：&#10;醬油 2 大匙&#10;味醂 1 大匙"></textarea>
+      <div id="pv-seasoning" class="mt-2.5 flex flex-wrap gap-1.5" aria-live="polite"></div>
+    </div>
+
+    {/* 步驟 */}
+    <div>
+      <span class="block mb-1.5 text-sm font-bold text-soft">步驟 <span class="font-normal text-faint">（開頭打 * 的行會變成小撇步）</span></span>
+      <textarea id="f-steps" class="field !min-h-[12rem]" placeholder="一行一個步驟，例如：&#10;雞腿抹鹽靜置 15 分鐘。&#10;* 沿鍋邊淋油再下雞腿，不黏鍋。&#10;熱鍋煎至金黃。"></textarea>
+      <div id="pv-steps" class="mt-2.5 space-y-2" aria-live="polite"></div>
+    </div>
+  </div>
+
+  {/* 底部動作列 */}
+  <div class="fixed bottom-0 inset-x-0 z-40 border-t border-line bg-paper/95 backdrop-blur px-4 md:px-6 py-3 flex items-center gap-3" style="padding-bottom:calc(0.75rem + env(safe-area-inset-bottom))">
+    <div class="max-w-3xl mx-auto w-full flex items-center gap-3">
+      <button id="btn-delete" class="btn-ghost !py-2 !text-warn hidden shrink-0">
+        <Icon name="trash" size={15} /> 刪除
+      </button>
+      <div class="flex-1"></div>
+      <a href="/" class="btn-ghost !py-2 shrink-0 hidden sm:inline-flex">取消</a>
+      <button id="btn-save" class="btn-accent shrink-0">
+        <Icon name="save" size={16} /> 儲存食譜
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import type { Recipe } from '../lib/types'
+  import { parseIngredientLines, parseSteps, sp } from '../lib/parser'
+  import { REPO, hasAuth, login, writeTextFile, uploadImage, deleteFile } from '../lib/github'
+  import { toast, confirmDialog, ic, esc, requireAuth } from '../lib/ui'
+  import * as state from '../lib/state'
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
+
+  // 食譜識別放在 ?s=參數（避免中文路徑的編碼問題）
+  const initialSlug = new URLSearchParams(location.search).get('s') ?? ''
+  let recipes: Recipe[] = []
+  let editing: Recipe | null = null
+  let photoFile: File | null = null
+  let saving = false
+
+  // ---------- 啟動 ----------
+  async function boot() {
+    try {
+      const r = await fetch('/recipes.json', { cache: 'no-store' })
+      recipes = await r.json()
+    } catch {
+      recipes = []
+    }
+
+    if (initialSlug) {
+      editing = recipes.find((r) => r.slug === initialSlug) ?? null
+      if (!editing) {
+        toast('找不到這道食譜，可能已被刪除', 'warn', true)
+        location.href = '/'
+        return
+      }
+      document.getElementById('form-title')!.textContent = '編輯食譜'
+      prefill(editing)
+      $('btn-delete').classList.remove('hidden')
+    }
+
+    if (!REPO.owner) {
+      $('auth-banner').classList.remove('hidden')
+      $('banner-login').textContent = '部署後可用'
+      ;($('banner-login') as HTMLButtonElement).disabled = true
+    } else if (!hasAuth()) {
+      $('auth-banner').classList.remove('hidden')
+    }
+
+    bind()
+    renderPreviews()
+  }
+
+  function prefill(r: Recipe) {
+    ;($('f-title') as HTMLInputElement).value = r.title
+    ;($('f-category') as HTMLSelectElement).value = r.category
+    ;($('f-type') as HTMLSelectElement).value = r.type
+    ;($('f-cuisine') as HTMLSelectElement).value = r.cuisine
+    if (r.time) ($('f-time') as HTMLInputElement).value = String(r.time)
+    if (r.source) ($('f-source') as HTMLInputElement).value = r.source
+    ;($('f-servings') as HTMLInputElement).value = String(r.servings || 4)
+    ;($('f-main') as HTMLTextAreaElement).value = r.raw.main
+    ;($('f-marinade') as HTMLTextAreaElement).value = r.raw.marinade
+    ;($('f-seasoning') as HTMLTextAreaElement).value = r.raw.seasoning
+    ;($('f-steps') as HTMLTextAreaElement).value = r.raw.steps
+    if (r.photo) {
+      const img = $('photo-preview') as HTMLImageElement
+      img.src = `/photos/${encodeURIComponent(r.photo)}`
+      img.classList.remove('hidden')
+      ;($('photo-icon') as HTMLElement).classList.add('hidden')
+      $('photo-hint').textContent = '點擊更換照片'
+    }
+  }
+
+  // ---------- 照片 ----------
+  function compress(file: File): Promise<{ full: string; thumb: string }> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const make = (max: number, quality: number) => {
+          const scale = Math.min(1, max / Math.max(img.width, img.height))
+          const canvas = document.createElement('canvas')
+          canvas.width = Math.round(img.width * scale)
+          canvas.height = Math.round(img.height * scale)
+          const ctx = canvas.getContext('2d')!
+          ctx.fillStyle = '#FFFDF9'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          return canvas.toDataURL('image/jpeg', quality)
+        }
+        resolve({ full: make(1600, 0.85), thumb: make(480, 0.82) })
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        reject(new Error('圖片載入失敗'))
+      }
+      img.src = url
+    })
+  }
+
+  // ---------- 即時解析預覽 ----------
+  function ingredientPreview(textareaId: string, boxId: string) {
+    const box = $(boxId)
+    const lines = parseIngredientLines(($(textareaId) as HTMLTextAreaElement).value)
+    box.innerHTML =
+      lines.length === 0
+        ? `<span class="text-xs text-faint">打字的同時，這裡會即時顯示解析結果</span>`
+        : lines
+            .map((l) => {
+              const qty =
+                l.qty != null ? `× ${l.qty}${l.unit ? ' ' + l.unit : ''}` : (l.qtyText ?? '')
+              return `<span class="text-[13px] px-2.5 py-1 rounded-full bg-cream text-soft">${esc(sp(l.name))}${qty ? ` <b class="text-accent-deep font-normal">${esc(sp(qty))}</b>` : ''}</span>`
+            })
+            .join('')
+  }
+
+  function stepsPreview() {
+    const box = $('pv-steps')
+    const steps = parseSteps(($('f-steps') as HTMLTextAreaElement).value)
+    box.innerHTML =
+      steps.length === 0
+        ? `<span class="text-xs text-faint">步驟會自動編號；「*」開頭的行會變成小撇步</span>`
+        : steps
+            .map(
+              (s, i) => `
+          <div class="flex gap-2.5 items-start">
+            <span class="w-6 h-6 rounded-full bg-cream text-accent-deep font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-ink leading-relaxed">${esc(sp(s.text))}</p>
+              ${s.tips.map((t) => `<div class="tip-box mt-1.5 !py-1.5 !text-[13px]">${ic('bulb', 14)}<span>${esc(sp(t))}</span></div>`).join('')}
+            </div>
+          </div>`,
+            )
+            .join('')
+  }
+
+  function renderPreviews() {
+    ingredientPreview('f-main', 'pv-main')
+    ingredientPreview('f-marinade', 'pv-marinade')
+    ingredientPreview('f-seasoning', 'pv-seasoning')
+    stepsPreview()
+  }
+
+  // ---------- 事件 ----------
+  function bind() {
+    $('photo-zone').addEventListener('click', () => $('f-photo').click())
+    $('f-photo').addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      photoFile = file
+      const img = $('photo-preview') as HTMLImageElement
+      img.src = URL.createObjectURL(file)
+      img.classList.remove('hidden')
+      ;($('photo-icon') as HTMLElement).classList.add('hidden')
+      $('photo-hint').textContent = '點擊更換照片'
+    })
+
+    let timer: ReturnType<typeof setTimeout> | null = null
+    ;(['f-main', 'f-marinade', 'f-seasoning', 'f-steps'] as const).forEach((id) => {
+      $(id).addEventListener('input', () => {
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(renderPreviews, 180)
+      })
+    })
+
+    $('banner-login')?.addEventListener('click', () => login())
+    $('btn-save').addEventListener('click', () => void save())
+    $('btn-delete').addEventListener('click', () => void del())
+  }
+
+  // ---------- 組 md ----------
+  const q = (s: string) => `"${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+
+  function slugify(title: string): string {
+    const s = title
+      .trim()
+      .replace(/[/\\]+/g, '-')
+      .replace(/[<>:"|?*#%&{}$!'@+`=~^,.;:：、。！？「」（）\[\]【】\s]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 30)
+    return s || 'recipe-' + Date.now().toString(36)
+  }
+
+  function buildMd(f: Record<string, string | number | undefined>): string {
+    const now = new Date().toISOString()
+    const lines: string[] = ['---', `title: ${q(String(f.title))}`]
+    if (f.photo) lines.push(`photo: ${q(String(f.photo))}`)
+    if (f.photoThumb) lines.push(`photoThumb: ${q(String(f.photoThumb))}`)
+    lines.push(`category: ${q(String(f.category))}`, `type: ${q(String(f.type))}`, `cuisine: ${q(String(f.cuisine))}`)
+    if (f.time) lines.push(`time: ${f.time}`)
+    if (f.source) lines.push(`source: ${q(String(f.source))}`)
+    lines.push(`servings: ${f.servings}`)
+    lines.push(`createdAt: ${q(editing?.createdAt ?? now)}`, `updatedAt: ${q(now)}`, '---', '')
+    const body: string[] = ['## 主食材', String(f.main ?? '').trim(), '']
+    if (String(f.marinade ?? '').trim()) body.push('## 醃料', String(f.marinade).trim(), '')
+    if (String(f.seasoning ?? '').trim()) body.push('## 調味料', String(f.seasoning).trim(), '')
+    body.push('## 步驟', String(f.steps ?? '').trim(), '')
+    return lines.join('\n') + '\n' + body.join('\n')
+  }
+
+  // ---------- 儲存 ----------
+  function setSaveBtn(text: string, disabled = true) {
+    const btn = $('btn-save') as HTMLButtonElement
+    btn.disabled = disabled
+    btn.innerHTML = disabled ? `${ic('save', 16)} ${esc(text)}` : `${ic('save', 16)} 儲存食譜`
+  }
+
+  async function save() {
+    if (saving) return
+    const title = ($('f-title') as HTMLInputElement).value.trim()
+    const category = ($('f-category') as HTMLSelectElement).value
+    const type = ($('f-type') as HTMLSelectElement).value
+    const cuisine = ($('f-cuisine') as HTMLSelectElement).value
+    const timeRaw = ($('f-time') as HTMLInputElement).value
+    const source = ($('f-source') as HTMLInputElement).value.trim()
+    const servings = Math.min(99, Math.max(1, Number(($('f-servings') as HTMLInputElement).value) || 4))
+    const main = ($('f-main') as HTMLTextAreaElement).value
+    const marinade = ($('f-marinade') as HTMLTextAreaElement).value
+    const seasoning = ($('f-seasoning') as HTMLTextAreaElement).value
+    const steps = ($('f-steps') as HTMLTextAreaElement).value
+
+    if (!title) return toast('請填寫菜名', 'warn')
+    if (!category) return toast('請選擇料理分類', 'warn')
+    if (!type) return toast('請選擇餐點類型', 'warn')
+    if (!cuisine) return toast('請選擇菜系', 'warn')
+    if (parseIngredientLines(main).length === 0) return toast('請至少填一項主食材（一行一項）', 'warn')
+    if (!requireAuth('儲存食譜')) return
+
+    saving = true
+    try {
+      let photo = editing?.photo
+      let photoThumb = editing?.photoThumb
+      if (photoFile) {
+        setSaveBtn('照片處理中…')
+        try {
+          const { full, thumb } = await compress(photoFile)
+          const base = `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}.jpg`
+          setSaveBtn('上傳照片中…')
+          const okFull = await uploadImage(`public/photos/${base}`, full, `上傳照片：${title}`)
+          if (okFull) {
+            photo = base
+            const okThumb = await uploadImage(`public/photos/thumbs/${base}`, thumb, `上傳縮圖：${title}`)
+            photoThumb = okThumb ? base : undefined
+          } else {
+            toast('照片上傳失敗，先以沒有照片的方式儲存', 'warn')
+          }
+        } catch {
+          toast('照片處理失敗，先以沒有照片的方式儲存', 'warn')
+        }
+      }
+
+      const md = buildMd({ title, photo, photoThumb, category, type, cuisine, time: timeRaw ? Number(timeRaw) : undefined, source, servings, main, marinade, seasoning, steps })
+
+      let slug = editing?.slug ?? slugify(title)
+      const isCreate = !editing
+      if (isCreate && recipes.some((r) => r.slug === slug)) slug = `${slug}-${Math.random().toString(36).slice(2, 5)}`
+
+      setSaveBtn('儲存中…')
+      let res = await writeTextFile(`src/content/recipes/${slug}.md`, md, `${isCreate ? '新增' : '更新'}食譜：${title}`, { create: isCreate })
+      if (res.conflict && isCreate) {
+        // 檔名撞到別道食譜（清單還沒同步到）→ 換個後綴再試一次
+        slug = `${slug}-${Math.random().toString(36).slice(2, 5)}`
+        res = await writeTextFile(`src/content/recipes/${slug}.md`, md, `新增食譜：${title}`, { create: true })
+      }
+      if (!res.ok) throw new Error(res.error ?? 'GitHub 寫入失敗')
+
+      toast('已儲存！網站更新中，大約 1-2 分鐘後生效', 'ok', true)
+      location.href = '/'
+    } catch (err) {
+      console.error(err)
+      toast('儲存失敗，請稍後再試一次', 'warn')
+      setSaveBtn('儲存食譜', false)
+      saving = false
+    }
+  }
+
+  // ---------- 刪除 ----------
+  async function del() {
+    if (!editing) return
+    if (!requireAuth('刪除食譜')) return
+    const ok = await confirmDialog({
+      title: '刪除食譜',
+      message: `確定要刪除「${editing.title}」嗎？\n刪除後無法復原。`,
+      confirmText: '刪除',
+      danger: true,
+    })
+    if (!ok) return
+    try {
+      const done = await deleteFile(`src/content/recipes/${editing.slug}.md`, `刪除食譜：${editing.title}`)
+      if (!done) throw new Error('刪除失敗')
+      if (state.inToday(editing.slug)) state.removeToday(editing.slug)
+      toast('已刪除，網站更新中（約 1-2 分鐘）', 'ok', true)
+      location.href = '/'
+    } catch {
+      toast('刪除失敗，請稍後再試', 'warn')
+    }
+  }
+
+  document.addEventListener('tj:ready', () => void boot())
+</script>

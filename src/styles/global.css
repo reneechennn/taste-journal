@@ -1,0 +1,304 @@
+@import "tailwindcss";
+
+/* ============ 味覺手帳 · 設計系統 ============ */
+@theme {
+  /* 溫潤日系配色 */
+  --color-paper: #faf6ef;
+  --color-cream: #f4ede1;
+  --color-card: #ffffff;
+  --color-ink: #443c31;
+  --color-soft: #7a7060;
+  --color-faint: #b3a895;
+  --color-line: #eae0cf;
+  --color-accent: #c2704b;
+  --color-accent-deep: #a85a3b;
+  --color-accent-soft: #f6e3d8;
+  --color-leaf: #7e8c6e;
+  --color-leaf-soft: #e9ecdd;
+  --color-warn: #b3553e;
+
+  /* 字體 */
+  --font-hand: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Heiti TC", sans-serif;
+}
+
+/* ============ 基礎 ============ */
+html {
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-hand);
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+  background-image: radial-gradient(1200px 500px at 50% -80px, rgba(255, 252, 245, 0.9), transparent 70%);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* 紙張紋理（細噪點，營造手帳紙感） */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+/* ============ 共用元件 ============ */
+@layer components {
+  /* 卡片 */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 1px 2px rgba(97, 78, 55, 0.04),
+      0 14px 34px -22px rgba(97, 78, 55, 0.28);
+  }
+
+  /* 主要按鈕 */
+  .btn-accent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 9999px;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.925rem;
+    line-height: 1.4;
+    box-shadow: 0 6px 16px -8px rgba(194, 112, 75, 0.55);
+    transition: background 0.18s ease, transform 0.12s ease;
+  }
+  .btn-accent:hover { background: var(--color-accent-deep); }
+  .btn-accent:active { transform: scale(0.97); }
+  .btn-accent:disabled { opacity: 0.45; box-shadow: none; }
+
+  /* 次要按鈕 */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--color-card);
+    color: var(--color-soft);
+    border: 1px solid var(--color-line);
+    border-radius: 9999px;
+    padding: 0.5rem 1.15rem;
+    font-size: 0.925rem;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease;
+  }
+  .btn-ghost:hover { background: var(--color-cream); color: var(--color-ink); }
+  .btn-ghost:active { transform: scale(0.97); }
+
+  /* 標籤 pill */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.16rem 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .pill-type { background: var(--color-accent-soft); color: var(--color-accent-deep); }
+  .pill-cuisine { background: var(--color-cream); color: var(--color-soft); }
+  .pill-tag { background: var(--color-leaf-soft); color: var(--color-leaf); }
+
+  /* 可選擇的篩選 chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 9999px;
+    padding: 0.3rem 0.95rem;
+    font-size: 0.875rem;
+    background: var(--color-card);
+    color: var(--color-soft);
+    border: 1px solid var(--color-line);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { background: var(--color-cream); }
+  .chip.is-on {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+
+  /* 表單元素 */
+  .field {
+    width: 100%;
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    padding: 0.65rem 1rem;
+    font-size: 1rem;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .field::placeholder { color: var(--color-faint); }
+  .field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+  select.field { appearance: none; background-image: none; }
+
+  textarea.field { min-height: 7rem; line-height: 1.75; resize: vertical; }
+
+  /* 卡片右上角圓形快捷按鈕 */
+  .quick-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--color-soft);
+    border: 1px solid rgba(234, 224, 207, 0.9);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px -6px rgba(97, 78, 55, 0.35);
+    transition: all 0.15s ease;
+  }
+  .quick-btn:hover { color: var(--color-accent-deep); transform: translateY(-1px); }
+  .quick-btn.is-on {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+
+  /* 小撇步提示框 */
+  .tip-box {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    background: #f7efdd;
+    border: 1px dashed #e2cfa6;
+    border-radius: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    color: #8a734f;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* Modal 遮罩與面板 */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(68, 60, 49, 0.38);
+    backdrop-filter: blur(3px);
+    animation: fade-in 0.2s ease;
+  }
+  .modal-panel {
+    position: fixed;
+    z-index: 51;
+    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: 1.5rem;
+    box-shadow: 0 30px 80px -30px rgba(68, 60, 49, 0.5);
+    animation: pop-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  /* 手機：底部面板 */
+  @media (max-width: 767px) {
+    .modal-panel {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 92dvh;
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+  }
+  /* 桌機：置中視窗 */
+  @media (min-width: 768px) {
+    .modal-panel {
+      inset: 0;
+      margin: auto;
+      width: min(46rem, 92vw);
+      height: min(88dvh, 50rem);
+    }
+  }
+
+  .modal-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Toast */
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-ink);
+    color: #fdfaf4;
+    border-radius: 9999px;
+    padding: 0.55rem 1.15rem;
+    font-size: 0.9rem;
+    box-shadow: 0 12px 30px -12px rgba(68, 60, 49, 0.6);
+    animation: toast-in 0.25s ease;
+  }
+  .toast.warn { background: var(--color-warn); }
+  .toast.ok { background: var(--color-leaf); }
+}
+
+/* ============ 動畫 ============ */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.skeleton {
+  background: var(--color-cream);
+  border-radius: 1rem;
+  animation: skeleton-pulse 1.6s ease infinite;
+}
+
+/* ============ 圖示 ============ */
+svg.ic {
+  display: inline-block;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -0.15em;
+}
+
+/* ============ 無障礙 ============ */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
