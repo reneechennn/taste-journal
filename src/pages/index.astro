@@ -87,7 +87,7 @@ const recipes = await loadAllRecipes()
     }
     listEl.innerHTML =
       list.length === 0
-        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，從下面挑幾道吧 ${ic('chef', 16)}</div>`
+        ? `<div class="sm:col-span-2 text-center text-soft text-sm py-7 border-2 border-dashed border-line rounded-2xl">還沒排定今天的餐點，從下面挑幾道吧</div>`
         : list.map(todayCardHtml).join('')
   }
 
