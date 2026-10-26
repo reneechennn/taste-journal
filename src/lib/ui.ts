@@ -2,7 +2,7 @@
 // 事件代理、食譜 Modal、Toast、確認視窗、卡片渲染、登入流程。
 
 import type { IngredientLine, Recipe } from './types'
-import { REPO, captureToken, deleteFile, hasAuth, login, logout } from './github'
+import { REPO, captureToken, hasAuth, login, logout } from './github'
 import * as state from './state'
 import { sp, scaledText } from './parser'
 
@@ -285,7 +285,6 @@ function buildModal(r: Recipe): void {
             <div class="absolute top-3 right-3 flex gap-2">
               <button class="quick-btn ${state.inToday(r.slug) ? 'is-on' : ''}" data-action="toggle-today" data-slug="${esc(r.slug)}" title="加入／移出今日餐點" aria-label="加入今日餐點">${ic('chef', 16)}</button>
               <button class="quick-btn" data-action="edit-recipe" data-slug="${esc(r.slug)}" title="編輯食譜">${ic('pencil', 15)}</button>
-              <button class="quick-btn" data-action="delete-recipe" data-slug="${esc(r.slug)}" title="刪除食譜">${ic('trash', 15)}</button>
               <button class="quick-btn" data-action="close-modal" title="關閉">${ic('x', 16)}</button>
             </div>
           </div>
@@ -408,32 +407,6 @@ async function handleToggleToday(slug: string): Promise<void> {
   document.dispatchEvent(new CustomEvent('tj:state'))
 }
 
-async function handleDelete(slug: string): Promise<void> {
-  const r = recipes.find((x) => x.slug === slug)
-  const title = r?.title ?? slug
-  if (!requireAuth('刪除食譜')) return
-  const ok = await confirmDialog({
-    title: '刪除食譜',
-    message: `確定要刪除「${title}」嗎？\n刪除後無法復原。`,
-    confirmText: '刪除',
-    danger: true,
-  })
-  if (!ok) return
-  try {
-    const done = await deleteFile(`src/content/recipes/${slug}.md`, `刪除食譜：${title}`)
-    if (!done) throw new Error('GitHub 刪除失敗')
-    if (state.inToday(slug)) {
-      state.removeToday(slug)
-      document.dispatchEvent(new CustomEvent('tj:state'))
-    }
-    closeModal()
-    toast('已刪除，網站更新中（約 1-2 分鐘）', 'ok', true)
-    location.href = '/'
-  } catch {
-    toast('刪除失敗，請稍後再試一次', 'warn')
-  }
-}
-
 // ---------- Tab bar 上的採買數量角標 ----------
 
 function updateBadge(): void {
@@ -476,11 +449,6 @@ function setupDelegation(): void {
         case 'edit-recipe':
           e.preventDefault()
           location.href = slug ? `/edit?s=${encodeURIComponent(slug)}` : '/edit'
-          return
-        case 'delete-recipe':
-          e.preventDefault()
-          e.stopPropagation()
-          if (slug) void handleDelete(slug)
           return
         case 'close-modal':
           e.preventDefault()
