@@ -173,13 +173,13 @@ export function recipeCardHtml(r: Recipe): string {
   <article class="card overflow-hidden flex flex-col">
     <div class="cursor-pointer flex flex-col flex-1" data-action="open-recipe" data-slug="${esc(r.slug)}">
       ${photo}
-      <div class="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
-        <h3 class="text-[15px] sm:text-[17px] leading-snug font-bold">${esc(sp(r.title))}</h3>
-        ${r.time ? `<div class="mt-1 sm:mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm text-soft">${ic('clock', 14)} 約 ${esc(String(r.time))} 分鐘</div>` : ''}
-        <div class="mt-2 sm:mt-3 flex flex-wrap gap-1.5">
-          <span class="pill pill-type">${esc(r.type)}</span>
-          <span class="pill pill-cuisine">${esc(r.cuisine)}</span>
+      <div class="p-4 sm:p-5 flex flex-col flex-1">
+        <div class="flex flex-wrap gap-1.5">
+          <span class="pill pill-type">${esc(r.cuisine)}</span>
+          <span class="pill pill-cuisine">${esc(r.type)}</span>
         </div>
+        <h3 class="mt-3 font-serif text-[18px] sm:text-[21px] lg:text-[23px] font-bold leading-snug">${esc(sp(r.title))}</h3>
+        ${r.time ? `<div class="mt-2 flex items-center gap-1.5 text-[13px] sm:text-[14px] text-soft">${ic('clock', 15)} 約 ${esc(String(r.time))} 分鐘</div>` : ''}
       </div>
     </div>
   </article>`
@@ -214,15 +214,15 @@ function ingredientSectionsHtml(r: Recipe): string {
     if (g.lines.length === 0) continue
     html += `
     <section>
-      <h3 class="font-bold mb-2">${g.label} <span class="text-faint font-normal text-sm">${g.lines.length}</span></h3>
+      <h3 class="font-serif text-[17px] md:text-[18px] font-bold mb-2.5">${g.label} <span class="text-faint font-normal text-sm">${g.lines.length}</span></h3>
       <div class="card !shadow-none p-3.5 md:p-4">
         ${g.lines
           .map(
             (l, i) => `
-        <label class="flex items-center gap-3 py-[7px]">
+        <label class="flex items-center gap-3 py-2">
           <span class="ing-round"><input type="checkbox" class="ing-check" data-section="${g.key}" data-idx="${i}"><span class="ball">${ic('check', 13)}</span></span>
-          <span class="flex-1 leading-relaxed">${esc(sp(l.name))}</span>
-          <span class="text-soft whitespace-nowrap" data-qty>${esc(sp(scaledText(l, r.servings, currentServings)))}</span>
+          <span class="flex-1 text-[15px] md:text-[16px] leading-relaxed">${esc(sp(l.name))}</span>
+          <span class="text-soft whitespace-nowrap text-[14px]" data-qty>${esc(sp(scaledText(l, r.servings, currentServings)))}</span>
         </label>`,
           )
           .join('')}
@@ -236,7 +236,7 @@ function stepsHtml(r: Recipe): string {
   if (r.steps.length === 0) return ''
   return `
   <section>
-    <h3 class="font-bold mb-3">步驟</h3>
+    <h3 class="font-serif text-[17px] md:text-[18px] font-bold mb-4">步驟</h3>
     <ol class="space-y-4">
       ${r.steps
         .map(
@@ -244,7 +244,7 @@ function stepsHtml(r: Recipe): string {
       <li class="flex gap-3">
         <span class="w-7 h-7 rounded-full bg-cream text-accent-deep font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
         <div class="flex-1 min-w-0">
-          <p class="leading-[1.9]">${esc(sp(s.text))}</p>
+          <p class="text-[15px] md:text-[16px] leading-[1.9]">${esc(sp(s.text))}</p>
           ${s.tips.map((t) => `<div class="tip-box mt-2 ml-0">${ic('bulb', 16)}<span>${esc(sp(t))}</span></div>`).join('')}
         </div>
       </li>`,
@@ -289,10 +289,10 @@ function buildModal(r: Recipe): void {
             </div>
           </div>
           <div>
-            <h2 class="text-2xl font-bold leading-snug">${esc(sp(r.title))}</h2>
+            <h2 class="font-serif text-[26px] md:text-[30px] font-bold leading-snug">${esc(sp(r.title))}</h2>
             <div class="mt-3 flex flex-wrap gap-1.5">
-              <span class="pill pill-type">${esc(r.type)}</span>
-              <span class="pill pill-cuisine">${esc(r.cuisine)}</span>
+              <span class="pill pill-type">${esc(r.cuisine)}</span>
+              <span class="pill pill-cuisine">${esc(r.type)}</span>
               <span class="pill pill-tag">${esc(r.category)}</span>
             </div>
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14px]">
@@ -473,11 +473,11 @@ function setupDelegation(): void {
           e.preventDefault()
           const r = currentRecipe
           if (!r) return
-          if (!requireAuth('加入採買清單')) return
+          if (!requireAuth('加入採購清單')) return
           const lines = collectCheckedLines()
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已將 ${n} 項食材加入採買清單`)
+          toast(`已將 ${n} 項食材加入採購清單`)
           document.dispatchEvent(new CustomEvent('tj:state'))
           document.querySelectorAll<HTMLInputElement>('.ing-check').forEach((c) => (c.checked = false))
           updateIngCount()
@@ -487,11 +487,11 @@ function setupDelegation(): void {
           e.preventDefault()
           const r = currentRecipe
           if (!r) return
-          if (!requireAuth('加入採買清單')) return
+          if (!requireAuth('加入採購清單')) return
           const lines = allLines(r)
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已將 ${n} 項食材加入採買清單`)
+          toast(`已將 ${n} 項食材加入採購清單`)
           document.dispatchEvent(new CustomEvent('tj:state'))
           return
         }

@@ -10,7 +10,7 @@ const recipes = await loadAllRecipes()
   {/* ---------- 區塊一：今日餐點 ---------- */}
   <section aria-label="今日餐點" class="mb-10">
     <div class="flex items-end justify-between mb-3 px-1">
-      <h2 class="flex items-center gap-2 text-lg font-bold">
+      <h2 class="flex items-center gap-2 font-serif text-xl md:text-2xl font-bold">
         <span class="text-accent-deep"><Icon name="chef" size={20} /></span>
         今日餐點
       </h2>
@@ -24,23 +24,23 @@ const recipes = await loadAllRecipes()
   {/* ---------- 區塊二：食譜列表 ---------- */}
   <section aria-label="食譜列表">
     <div class="flex items-center justify-between gap-3 mb-4 px-1">
-      <h2 class="text-lg font-bold">食譜列表</h2>
+      <h2 class="font-serif text-xl md:text-2xl font-bold">食譜列表</h2>
       <div class="flex items-center gap-1 bg-card border border-line rounded-full p-1" role="group" aria-label="排序方式">
         <button class="sort-pill is-on" data-mode="recent">最近新增</button>
         <button class="sort-pill" data-mode="cooked">經常烹調</button>
       </div>
     </div>
 
-    <div id="recipe-grid" class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
+    <div id="recipe-grid" class="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-2">
       {recipes.map((r) => <RecipeCard recipe={r} />)}
     </div>
   </section>
 
   <style>
     .sort-pill {
-      padding: 0.32rem 0.9rem;
+      padding: 0.34rem 0.95rem;
       border-radius: 9999px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--color-soft);
       white-space: nowrap;
       transition: all 0.15s ease;

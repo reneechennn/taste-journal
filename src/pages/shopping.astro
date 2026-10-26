@@ -2,36 +2,39 @@
 import Layout from '../layouts/Layout.astro'
 import Icon from '../components/Icon.astro'
 ---
-<Layout title="採買清單">
-  <div class="flex items-center justify-between mb-5 px-1">
-    <h2 class="flex items-center gap-2 text-lg font-bold">
-      <span class="text-accent-deep"><Icon name="basket" size={19} /></span>
-      採買清單
-    </h2>
-    <div class="flex gap-2">
-      <button id="btn-clear-done" class="btn-ghost !py-1.5 !px-3.5 text-sm">清空已完成</button>
-      <button id="btn-clear-all" class="btn-ghost !py-1.5 !px-3.5 text-sm !text-warn">清空全部</button>
-    </div>
+<Layout title="採購清單">
+  {/* 頁面標題與待買數量 */}
+  <div class="mb-8 px-1">
+    <h1 class="font-serif text-[38px] md:text-[54px] font-bold leading-tight tracking-wide">採購清單</h1>
+    <p id="shopping-sub" class="mt-2 text-[15px] md:text-[17px] text-soft">
+      還有 <b class="text-accent-deep font-serif">0</b> 項要買
+    </p>
   </div>
 
   {/* 手動新增 */}
-  <div class="flex gap-2 mb-5">
+  <div class="flex gap-3 mb-4 max-w-3xl">
     <input
       id="custom-input"
-      class="field !rounded-full"
+      class="field !rounded-full !py-3.5 text-[16px]"
       placeholder="手動新增項目（例如：洗潔精）"
       autocomplete="off"
     />
-    <button id="btn-add-custom" class="btn-accent !px-5 shrink-0" aria-label="新增項目">
-      <Icon name="plus" size={18} />
+    <button id="btn-add-custom" class="btn-accent !w-12 !h-12 !p-0 shrink-0" aria-label="新增項目">
+      <Icon name="plus" size={20} />
     </button>
   </div>
 
-  {/* 清單 */}
-  <div id="shopping-list" class="grid gap-2.5">
-    <div class="skeleton h-16"></div>
-    <div class="skeleton h-16"></div>
-    <div class="skeleton h-16"></div>
+  {/* 清空按鈕 */}
+  <div class="flex gap-2.5 mb-8 px-0.5">
+    <button id="btn-clear-done" class="btn-ghost !py-2.5 !px-5 text-[15px]">清空已完成</button>
+    <button id="btn-clear-all" class="btn-ghost !py-2.5 !px-5 text-[15px] !text-warn">清空全部</button>
+  </div>
+
+  {/* 清單：單一大卡＋細分隔線 */}
+  <div id="shopping-list" class="card overflow-hidden divide-y divide-line max-w-3xl">
+    <div class="px-5 py-4"><div class="skeleton h-9"></div></div>
+    <div class="px-5 py-4"><div class="skeleton h-9"></div></div>
+    <div class="px-5 py-4"><div class="skeleton h-9"></div></div>
   </div>
 </Layout>
 
@@ -52,16 +55,22 @@ import Icon from '../components/Icon.astro'
   function render() {
     const listEl = document.getElementById('shopping-list')
     if (!listEl) return
+    const allItems = [...state.snapshot().shopping.items]
+    const undone = allItems.filter((i) => !i.checked).length
+
+    // 標題下方「還有 N 項要買」
+    const sub = document.getElementById('shopping-sub')
+    if (sub) sub.innerHTML = `還有 <b class="text-accent-deep font-serif">${undone}</b> 項要買`
+
     // 未完成的排前面，勾過的排後面（各自維持原順序）
-    const items = [...state.snapshot().shopping.items]
-    items.sort((a, b) => Number(a.checked) - Number(b.checked))
+    const items = allItems.sort((a, b) => Number(a.checked) - Number(b.checked))
 
     if (items.length === 0) {
       listEl.innerHTML = `
-        <div class="text-center py-12 border-2 border-dashed border-line rounded-3xl text-soft">
+        <div class="text-center py-14 px-6 text-soft">
           <div class="flex justify-center mb-3 text-faint">${ic('basket', 44)}</div>
-          <p class="font-medium">採買清單空空的，從食譜加入食材吧</p>
-          <a href="/search" class="btn-accent !py-2 text-sm mt-4">去找食譜 ${ic('search', 14)}</a>
+          <p class="font-medium">採購清單空空的，從食譜加入食材吧</p>
+          <a href="/search" class="btn-accent !py-2 text-sm mt-5">去找食譜 ${ic('search', 14)}</a>
         </div>`
       return
     }
@@ -69,19 +78,19 @@ import Icon from '../components/Icon.astro'
     listEl.innerHTML = items
       .map(
         (item) => `
-      <div class="card !shadow-none flex items-center gap-3 px-4 py-3 ${item.checked ? 'opacity-50' : ''}">
+      <div class="flex items-center gap-3.5 px-5 py-4 ${item.checked ? 'opacity-60' : ''}">
         <button
           class="shrink-0 w-[26px] h-[26px] rounded-full border-2 flex items-center justify-center transition-colors"
           style="${item.checked
             ? 'background:var(--color-leaf);border-color:var(--color-leaf);color:#fff'
-            : 'border-color:var(--color-line);color:transparent'}"
+            : 'border-color:#d9cfbf;color:transparent'}"
           data-check="${esc(item.id)}"
           title="${item.checked ? '取消勾選' : '標記已購買'}"
-        >${ic('check', 15)}</button>
+        >${ic('check', 14)}</button>
         <div class="flex-1 min-w-0">
-          <p class="font-medium leading-snug ${item.checked ? 'line-through text-faint' : ''}">
+          <p class="text-[16px] md:text-[17px] font-medium leading-snug ${item.checked ? 'line-through text-faint' : ''}">
             ${esc(sp(item.name))}
-            ${qtyText(item) ? `<span class="text-soft font-normal text-sm ml-1">${esc(sp(qtyText(item)))}</span>` : ''}
+            ${qtyText(item) ? `<span class="text-soft font-normal text-[14px] ml-1">${esc(sp(qtyText(item)))}</span>` : ''}
           </p>
           ${
             item.sources.length > 0
@@ -91,8 +100,8 @@ import Icon from '../components/Icon.astro'
               : ''
           }
         </div>
-        <button class="quick-btn !w-8 !h-8 shrink-0" data-remove="${esc(item.id)}" title="刪除項目">
-          ${ic('trash', 14)}
+        <button class="shrink-0 text-faint hover:text-accent-deep transition-colors p-1.5" data-remove="${esc(item.id)}" title="刪除項目">
+          ${ic('trash', 16)}
         </button>
       </div>`,
       )
@@ -110,7 +119,7 @@ import Icon from '../components/Icon.astro'
     document.getElementById('shopping-list')?.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('[data-check]') as HTMLElement | null
       if (btn) {
-        if (!requireAuth('更新採買清單')) return
+        if (!requireAuth('更新採購清單')) return
         state.toggleShoppingItem(btn.dataset.check!)
         refresh()
         return
@@ -127,7 +136,7 @@ import Icon from '../components/Icon.astro'
       if (!customInput) return
       const name = customInput.value.trim()
       if (!name) return
-      if (!requireAuth('新增採買項目')) return
+      if (!requireAuth('新增採購項目')) return
       state.addCustomItem(name)
       customInput.value = ''
       refresh()

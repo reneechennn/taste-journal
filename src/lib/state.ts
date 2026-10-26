@@ -1,5 +1,5 @@
 // ============ 味覺手帳 · 狀態管理 ============
-// 今日餐點（每日歸檔）、烹調次數、採買清單。
+// 今日餐點（每日歸檔）、烹調次數、採購清單。
 // 全部存在 GitHub repo 的 state/ 資料夾，跨裝置同步。
 
 import type { CookCounts, IngredientLine, MenuFile, ShoppingFile, ShoppingItem } from './types'
@@ -104,9 +104,9 @@ export function removeToday(slug: string) {
   scheduleMenuWrite()
 }
 
-// ---------- 採買清單 ----------
+// ---------- 採購清單 ----------
 
-/** 把食材匯入採買清單（同名同單位自動加總、模糊描述保留文字） */
+/** 把食材匯入採購清單（同名同單位自動加總、模糊描述保留文字） */
 export function importToShopping(sourceTitle: string, lines: IngredientLine[]): number {
   let added = 0
   for (const line of lines) {
@@ -133,11 +133,11 @@ export function importToShopping(sourceTitle: string, lines: IngredientLine[]): 
     }
     added++
   }
-  scheduleShoppingWrite(`加入採買清單（${sourceTitle}）`)
+  scheduleShoppingWrite(`加入採購清單（${sourceTitle}）`)
   return added
 }
 
-function scheduleShoppingWrite(message = '更新採買清單') {
+function scheduleShoppingWrite(message = '更新採購清單') {
   writeJSON('state/shopping-list.json', () => shopping, { message })
 }
 
@@ -167,5 +167,5 @@ export function clearDoneItems() {
 
 export function clearAllItems() {
   shopping = { items: [] }
-  scheduleShoppingWrite('清空採買清單')
+  scheduleShoppingWrite('清空採購清單')
 }

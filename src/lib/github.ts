@@ -169,7 +169,7 @@ export async function uploadImage(path: string, dataUrl: string, message: string
 }
 
 // ---------- 狀態 JSON 寫入佇列（debounce + 衝突重試） ----------
-// 採買清單勾勾、今日餐點切換這類快速操作，會先彙整再一次性送出。
+// 採購清單勾勾、今日餐點切換這類快速操作，會先彙整再一次性送出。
 
 type WriteJob = { getData: () => any; message: string; merge?: (remote: any, ours: any) => any }
 const queue = new Map<string, WriteJob>()

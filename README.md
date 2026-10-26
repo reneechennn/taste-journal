@@ -31,7 +31,7 @@ npm run dev                            # → http://localhost:4321
 |---|---|
 | 網站 | Astro 5（純靜態輸出） |
 | 樣式 | Tailwind CSS 4 |
-| 字體 | LXGW WenKai TC（霞鶩文楷） |
+| 字體 | Noto Serif TC（標題）＋ Noto Sans TC（內文） |
 | 資料 | GitHub repo（md 食譜 + JSON 狀態檔） |
 | 託管 | Cloudflare Pages（免費子網域） |
 | 登入 | GitHub OAuth（Pages Function `functions/api/auth`） |

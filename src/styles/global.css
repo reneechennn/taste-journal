@@ -2,23 +2,24 @@
 
 /* ============ 味覺手帳 · 設計系統 ============ */
 @theme {
-  /* 溫潤日系配色 */
-  --color-paper: #faf6ef;
-  --color-cream: #f4ede1;
+  /* 溫潤編輯雜誌配色 */
+  --color-paper: #f7f3ec;
+  --color-cream: #f1ebe1;
   --color-card: #ffffff;
-  --color-ink: #443c31;
-  --color-soft: #7a7060;
-  --color-faint: #b3a895;
-  --color-line: #eae0cf;
-  --color-accent: #c2704b;
-  --color-accent-deep: #a85a3b;
-  --color-accent-soft: #f6e3d8;
-  --color-leaf: #7e8c6e;
-  --color-leaf-soft: #e9ecdd;
-  --color-warn: #b3553e;
+  --color-ink: #2e2a26;
+  --color-soft: #6f685f;
+  --color-faint: #a79e92;
+  --color-line: #e7dfd3;
+  --color-accent: #b05b36;
+  --color-accent-deep: #96482a;
+  --color-accent-soft: #f3e2d8;
+  --color-leaf: #6b7a4f;
+  --color-leaf-soft: #e7ebda;
+  --color-warn: #b0553e;
 
-  /* 字體 */
-  --font-hand: "LXGW WenKai TC", "PingFang TC", "Noto Sans TC", "Heiti TC", sans-serif;
+  /* 字體：標題宋體、內文黑體 */
+  --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Heiti TC", "Noto Sans", sans-serif;
 }
 
 /* ============ 基礎 ============ */
@@ -28,23 +29,11 @@ html {
 }
 
 body {
-  font-family: var(--font-hand);
+  font-family: var(--font-sans);
   color: var(--color-ink);
   background-color: var(--color-paper);
-  background-image: radial-gradient(1200px 500px at 50% -80px, rgba(255, 252, 245, 0.9), transparent 70%);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: none;
-}
-
-/* 紙張紋理（細噪點，營造手帳紙感） */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 main {
@@ -114,9 +103,9 @@ main {
     line-height: 1.5;
     white-space: nowrap;
   }
-  .pill-type { background: var(--color-accent-soft); color: var(--color-accent-deep); }
-  .pill-cuisine { background: var(--color-cream); color: var(--color-soft); }
-  .pill-tag { background: var(--color-leaf-soft); color: var(--color-leaf); }
+  .pill-type { background: #f6e3da; color: #a34a2e; }
+  .pill-cuisine { background: var(--color-leaf-soft); color: #5f6b45; }
+  .pill-tag { background: var(--color-cream); color: var(--color-soft); }
 
   /* 可選擇的篩選 chips */
   .chip {

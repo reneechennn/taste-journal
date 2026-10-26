@@ -5,13 +5,13 @@ const path = Astro.url.pathname
 const tabs = [
   { href: '/', label: '首頁', icon: 'home' },
   { href: '/search', label: '搜尋', icon: 'search' },
-  { href: '/shopping', label: '採買', icon: 'basket' },
+  { href: '/shopping', label: '採購清單', icon: 'basket' },
 ]
 const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
 ---
 {/* 手機／平板：底部固定 Tab Bar（App 感） */}
 <nav
-  class="md:hidden fixed inset-x-0 bottom-0 z-40 bg-paper/95 backdrop-blur border-t border-line"
+  class="md:hidden fixed inset-x-0 bottom-0 z-40 bg-card/95 backdrop-blur border-t border-line"
   style="padding-bottom:env(safe-area-inset-bottom)"
   aria-label="主導覽"
 >
