@@ -17,10 +17,8 @@ function enhance(sel: HTMLSelectElement): void {
   wrap.className = 'tj-select'
   sel.before(wrap)
   sel.style.display = 'none'
+  sel.remove()
   wrap.append(sel)
-
-  const chevron = () =>
-    `<svg class="ic" style="width:15px;height:15px"><use href="#i-chevron"></use></svg>`
 
   const trigger = document.createElement('button')
   trigger.type = 'button'
@@ -33,6 +31,9 @@ function enhance(sel: HTMLSelectElement): void {
   const list = document.createElement('div')
   list.className = 'tj-select-list'
   list.setAttribute('role', 'listbox')
+
+  // 把觸發按鈕與選單掛進畫面（剛漏了這步）
+  wrap.append(trigger, list)
 
   const optionEls: HTMLElement[] = sel.options.length
     ? [...sel.options].map((o, i) => {
