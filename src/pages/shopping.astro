@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro'
 import Icon from '../components/Icon.astro'
 ---
 <Layout title="採買清單">
-  <div class="flex items-end justify-between mb-1 px-1">
+  <div class="flex items-center justify-between mb-5 px-1">
     <h2 class="flex items-center gap-2 text-lg font-bold">
       <span class="text-accent-deep"><Icon name="basket" size={19} /></span>
       採買清單
@@ -13,7 +13,6 @@ import Icon from '../components/Icon.astro'
       <button id="btn-clear-all" class="btn-ghost !py-1.5 !px-3.5 text-sm !text-warn">清空全部</button>
     </div>
   </div>
-  <p class="text-xs text-faint mb-4 px-1">從食譜加入的食材會自動彙總，同單位自動加總</p>
 
   {/* 手動新增 */}
   <div class="flex gap-2 mb-5">
