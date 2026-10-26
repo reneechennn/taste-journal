@@ -74,7 +74,7 @@ export function toast(msg: string, type: 'info' | 'ok' | 'warn' = 'info', keep =
     el.style.transition = 'opacity .3s ease'
     el.style.opacity = '0'
     setTimeout(() => el.remove(), 320)
-  }, 2400)
+  }, 3000)
 }
 
 function consumeKeepToast() {
@@ -477,7 +477,7 @@ function setupDelegation(): void {
           const lines = collectCheckedLines()
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已加入採買清單 ${n} 項`, 'ok')
+          toast(`已將 ${n} 項食材加入採買清單`)
           document.dispatchEvent(new CustomEvent('tj:state'))
           document.querySelectorAll<HTMLInputElement>('.ing-check').forEach((c) => (c.checked = false))
           updateIngCount()
@@ -491,7 +491,7 @@ function setupDelegation(): void {
           const lines = allLines(r)
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已加入採買清單 ${n} 項`, 'ok')
+          toast(`已將 ${n} 項食材加入採買清單`)
           document.dispatchEvent(new CustomEvent('tj:state'))
           return
         }

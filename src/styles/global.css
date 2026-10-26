@@ -317,12 +317,12 @@ main {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--color-ink);
+    background: rgba(56, 56, 56, 0.96);
     color: #fdfaf4;
     border-radius: 9999px;
-    padding: 0.55rem 1.15rem;
+    padding: 0.6rem 1.25rem;
     font-size: 0.9rem;
-    box-shadow: 0 12px 30px -12px rgba(68, 60, 49, 0.6);
+    box-shadow: 0 12px 30px -12px rgba(20, 20, 20, 0.55);
     animation: toast-in 0.25s ease;
   }
   .toast.warn { background: var(--color-warn); }
