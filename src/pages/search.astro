@@ -7,6 +7,11 @@ import { loadAllRecipes } from '../lib/parseCollection'
 import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
 
 const recipes = await loadAllRecipes()
+
+// 分類圖示套用 emoji 的項目（其餘維持線條插畫）
+const CATEGORY_EMOJI: Record<string, string> = {
+  牛肉: '🥩',
+}
 ---
 <Layout title="搜尋食譜">
   {/* 搜尋列 */}
@@ -45,7 +50,11 @@ const recipes = await loadAllRecipes()
       {
         CATEGORIES.map((c) => (
           <button class="cat-card" data-category={c}>
-            <CategoryIcon category={c} size={30} />
+            {CATEGORY_EMOJI[c] ? (
+              <span class="text-[30px] leading-none" aria-hidden="true">{CATEGORY_EMOJI[c]}</span>
+            ) : (
+              <CategoryIcon category={c} size={30} />
+            )}
             <span>{c}料理</span>
           </button>
         ))
