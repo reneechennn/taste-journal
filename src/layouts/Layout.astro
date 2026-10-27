@@ -45,7 +45,9 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
         <div class="flex items-center gap-3 md:gap-7 min-w-0">
           <a href="/" class="shrink-0 py-3">
             <span class="block font-serif text-[22px] md:text-[26px] font-bold leading-tight text-accent-deep">味覺手帳</span>
-            <span class="block text-[9px] md:text-[10px] tracking-[0.32em] text-faint leading-tight mt-0.5">TASTE JOURNAL</span>
+            <span class="flex justify-between text-[9px] md:text-[10px] text-faint leading-none mt-1" aria-label="TASTE JOURNAL">
+              {Array.from('TASTE JOURNAL').map((ch) => ch === ' ' ? <span class="w-[0.25em]" aria-hidden="true"></span> : <span aria-hidden="true">{ch}</span>)}
+            </span>
           </a>
           <nav class="hidden md:flex items-center gap-1 bg-cream/70 border border-line rounded-full p-1" aria-label="主導覽">
             {
