@@ -285,13 +285,13 @@ main {
       border-radius: 1.5rem 1.5rem 0 0;
     }
   }
-  /* 桌機：置中視窗 */
+  /* 桌機：置中視窗（加大版，一次看更多） */
   @media (min-width: 768px) {
     .modal-panel {
       inset: 0;
       margin: auto;
-      width: min(46rem, 92vw);
-      height: min(88dvh, 50rem);
+      width: min(56rem, 94vw);
+      height: min(94dvh, 60rem);
     }
   }
 

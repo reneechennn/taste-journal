@@ -272,8 +272,8 @@ function buildModal(r: Recipe): void {
   currentServings = r.servings || 4
   const url = photoUrl(r, false)
   const photo = url
-    ? `<img src="${esc(url)}" alt="${esc(r.title)}" class="w-full aspect-[16/9] object-cover rounded-2xl">`
-    : `<div class="w-full aspect-[16/9] bg-cream flex items-center justify-center text-faint rounded-2xl">${ic('image', 48)}</div>`
+    ? `<img src="${esc(url)}" alt="${esc(r.title)}" class="w-full aspect-[16/9] md:aspect-[21/9] object-cover rounded-2xl">`
+    : `<div class="w-full aspect-[16/9] md:aspect-[21/9] bg-cream flex items-center justify-center text-faint rounded-2xl">${ic('image', 48)}</div>`
 
   root.innerHTML = `
     <div class="modal-backdrop" data-action="close-modal"></div>
