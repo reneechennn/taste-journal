@@ -257,7 +257,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
             <span class="w-6 h-6 rounded-full bg-cream text-accent-deep font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
             <div class="flex-1 min-w-0">
               <p class="text-sm text-ink leading-relaxed">${esc(sp(s.text))}</p>
-              ${s.tips.map((t) => `<div class="tip-box mt-1.5 !py-1.5 !text-[13px]">${ic('bulb', 14)}<span>${esc(sp(t))}</span></div>`).join('')}
+              ${s.tips.map((t) => `<div class="tip-box mt-1.5 !py-1.5 !text-[13px]"><span class="shrink-0 text-[13px] leading-[1.7]">💡</span><span>${esc(sp(t))}</span></div>`).join('')}
             </div>
           </div>`,
             )

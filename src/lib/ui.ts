@@ -245,7 +245,7 @@ function stepsHtml(r: Recipe): string {
         <span class="w-7 h-7 rounded-full bg-cream text-accent-deep font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
         <div class="flex-1 min-w-0">
           <p class="text-[15px] md:text-[16px] leading-[1.9]">${esc(sp(s.text))}</p>
-          ${s.tips.map((t) => `<div class="tip-box mt-2 ml-0">${ic('bulb', 16)}<span>${esc(sp(t))}</span></div>`).join('')}
+          ${s.tips.map((t) => `<div class="tip-box mt-2 ml-0"><span class="shrink-0 text-[14px] leading-[1.7]">💡</span><span>${esc(sp(t))}</span></div>`).join('')}
         </div>
       </li>`,
         )
