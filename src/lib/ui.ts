@@ -256,13 +256,36 @@ function stepsHtml(r: Recipe): string {
 
 function sourceHtml(r: Recipe): string {
   if (!r.source) return ''
-  const isUrl = /^https?:\/\//i.test(r.source)
-  if (isUrl) {
-    let label = r.source.replace(/^https?:\/\//i, '')
-    if (label.length > 40) label = label.slice(0, 40) + '…'
-    return `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-accent-deep underline decoration-accent-soft underline-offset-4 break-all">${esc(sp(label))}${ic('external', 13)}</a>`
+  const src = r.source.trim()
+  // 支援三種寫法：純文字 / 只有網址 / 「顯示名稱 + 網址」
+  const urlMatch = src.match(/https?:\/\/\S+/i)
+  if (!urlMatch) return `<span class="text-soft">${esc(sp(src))}</span>`
+
+  const url = urlMatch[0]
+  const customLabel = src.replace(url, '').trim()
+  let host = ''
+  try {
+    host = new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    host = url.replace(/^https?:\/\//i, '').split('/')[0]
   }
-  return `<span class="text-soft">${esc(sp(r.source))}</span>`
+  const label = customLabel || host
+  const favicon = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=32`
+  const fallbackIcon = ic('external', 15)
+
+  return `<a href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url)}" class="inline-flex items-center gap-1.5 min-w-0 max-w-full text-accent-deep underline decoration-accent-soft underline-offset-4">
+    <img
+      src="${favicon}"
+      alt=""
+      width="16"
+      height="16"
+      class="w-4 h-4 rounded-[4px] shrink-0"
+      loading="lazy"
+      onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"
+    />
+    <span class="hidden shrink-0">${fallbackIcon}</span>
+    <span class="truncate max-w-[11rem] md:max-w-[18rem]">${esc(sp(label))}</span>${ic('external', 13)}
+  </a>`
 }
 
 function buildModal(r: Recipe): void {
@@ -298,7 +321,7 @@ function buildModal(r: Recipe): void {
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14px]">
               ${r.time ? `<span class="inline-flex items-center gap-1.5 text-soft">${ic('clock', 15)} 約 ${esc(String(r.time))} 分鐘</span>` : ''}
               <span class="inline-flex items-center gap-1.5 text-soft">${ic('user', 15)} ${fw(r.servings)} 人份</span>
-              ${r.source ? `<span class="inline-flex items-center gap-1.5">${ic('link', 15)} ${sourceHtml(r)}</span>` : ''}
+              ${r.source ? `<span class="inline-flex items-center gap-1.5 min-w-0">${sourceHtml(r)}</span>` : ''}
             </div>
           </div>
 
