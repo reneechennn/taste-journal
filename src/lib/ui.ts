@@ -302,12 +302,12 @@ function buildModal(r: Recipe): void {
             </div>
           </div>
 
-          <div class="card !shadow-none flex items-center justify-between px-4 py-3 bg-cream/60">
-            <div class="text-sm text-soft">用餐人數</div>
-            <div class="flex items-center gap-3">
-              <button class="quick-btn" data-action="servings-dec" title="減少人數" aria-label="減少人數">${ic('minus', 16)}</button>
-              <span class="font-bold text-accent-deep min-w-[4.5rem] text-center" data-servings>${fw(currentServings)} 人份</span>
-              <button class="quick-btn" data-action="servings-inc" title="增加人數" aria-label="增加人數">${ic('plus', 16)}</button>
+          <div class="card !shadow-none flex items-center justify-between px-3.5 py-2.5 md:px-4 md:py-3 bg-cream/60">
+            <div class="text-[14px] text-soft">用餐人數</div>
+            <div class="flex items-center gap-2 md:gap-3">
+              <button class="quick-btn !w-7 !h-7 md:!w-9 md:!h-9" data-action="servings-dec" title="減少人數" aria-label="減少人數">${ic('minus', 15)}</button>
+              <span class="font-bold text-accent-deep text-[15px] md:text-[16px] min-w-[2.5rem] md:min-w-[4.5rem] text-center" data-servings>${fw(currentServings)}</span>
+              <button class="quick-btn !w-7 !h-7 md:!w-9 md:!h-9" data-action="servings-inc" title="增加人數" aria-label="增加人數">${ic('plus', 15)}</button>
             </div>
           </div>
 
@@ -339,7 +339,7 @@ function refreshModal(): void {
     if (checked.has(`${c.dataset.section}:${c.dataset.idx}`)) c.checked = true
   })
   const s = document.querySelector('[data-servings]')
-  if (s) s.textContent = `${fw(currentServings)} 人份`
+  if (s) s.textContent = `${fw(currentServings)}`
   updateIngCount()
 }
 
