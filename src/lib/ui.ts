@@ -314,8 +314,8 @@ function buildModal(r: Recipe): void {
           <div data-ing-list class="space-y-5 md:space-y-6">${ingredientSectionsHtml(r)}</div>
 
           <div class="flex items-center gap-2">
-            <button class="btn-ghost flex-1 !py-2.5" data-action="add-checked" disabled>${ic('basket', 16)} 加入選取</button>
-            <button class="btn-accent flex-1 !py-2.5" data-action="add-all">${ic('basket', 16)} 全部加入</button>
+            <button class="btn-ghost flex-1 !py-2.5" data-action="add-checked" disabled>${ic('cart', 16)} 加入選取</button>
+            <button class="btn-accent flex-1 !py-2.5" data-action="add-all">${ic('cart', 16)} 全部加入</button>
           </div>
 
           ${stepsHtml(r)}
@@ -348,7 +348,7 @@ function updateIngCount(): void {
   const btn = document.querySelector('[data-action="add-checked"]') as HTMLButtonElement | null
   if (btn) {
     btn.disabled = n === 0
-    btn.innerHTML = `${ic('basket', 16)} ${n > 0 ? `加入選取(${n})` : '加入選取'}`
+    btn.innerHTML = `${ic('cart', 16)} ${n > 0 ? `加入選取(${n})` : '加入選取'}`
   }
 }
 

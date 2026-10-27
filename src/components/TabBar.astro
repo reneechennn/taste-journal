@@ -5,7 +5,7 @@ const path = Astro.url.pathname
 const tabs = [
   { href: '/', label: '首頁', icon: 'home' },
   { href: '/search', label: '搜尋', icon: 'search' },
-  { href: '/shopping', label: '採購清單', icon: 'basket' },
+  { href: '/shopping', label: '採購清單', icon: 'cart' },
 ]
 const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
 ---
