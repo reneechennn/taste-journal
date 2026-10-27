@@ -10,10 +10,7 @@ const recipes = await loadAllRecipes()
   {/* ---------- 區塊一：今日餐點 ---------- */}
   <section aria-label="今日餐點" class="mb-10">
     <div class="flex items-end justify-between mb-3 px-1">
-      <h2 class="flex items-center gap-2 font-serif text-xl md:text-2xl font-bold">
-        <span class="text-accent-deep"><Icon name="chef" size={20} /></span>
-        今日餐點
-      </h2>
+      <h2 class="font-serif text-xl md:text-2xl font-bold">今日餐點</h2>
     </div>
     <div id="today-list" class="grid grid-cols-2 gap-2.5 sm:gap-3">
       <div class="skeleton h-20"></div>
