@@ -259,7 +259,10 @@ function sourceHtml(r: Recipe): string {
   const src = r.source.trim()
   // 支援三種寫法：純文字 / 只有網址 / 「顯示名稱 + 網址」
   const urlMatch = src.match(/https?:\/\/\S+/i)
-  if (!urlMatch) return `<span class="text-soft">${esc(sp(src))}</span>`
+  if (!urlMatch) {
+    // 純文字來源（如書名頁）：攤開書本圖示 + 原文
+    return `<span class="inline-flex items-center gap-1.5 min-w-0 text-soft">${ic('book', 15)}<span class="truncate max-w-[11rem] md:max-w-[18rem]">${esc(sp(src))}</span></span>`
+  }
 
   const url = urlMatch[0]
   const customLabel = src.replace(url, '').trim()
