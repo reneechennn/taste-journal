@@ -410,11 +410,13 @@ async function handleToggleToday(slug: string): Promise<void> {
 // ---------- Tab bar 上的採買數量角標 ----------
 
 function updateBadge(): void {
-  const badge = document.getElementById('tab-badge')
-  if (!badge) return
-  const n = state.snapshot().shopping.items.length
-  badge.textContent = String(n)
-  badge.style.display = n > 0 ? '' : 'none'
+  // 有「未勾選」的待購食材 → 採購清單分頁顯示紅點（桌機導覽 + 手機底部列）
+  const pending = state.snapshot().shopping.items.filter((i) => !i.checked).length
+  const show = pending > 0
+  for (const id of ['tab-badge', 'nav-badge']) {
+    const el = document.getElementById(id)
+    if (el) el.style.display = show ? 'block' : 'none'
+  }
 }
 
 /** 更新所有 🧑‍🍳 按鈕的「已在今日餐點」狀態 */

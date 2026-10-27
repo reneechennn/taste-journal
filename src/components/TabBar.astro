@@ -27,7 +27,12 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
           aria-current={active(t.href) ? 'page' : undefined}
         >
           {t.href === '/shopping' && (
-            <span id="tab-badge" class="hidden absolute top-1 right-[24%] min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[11px] leading-[18px] text-center" />
+            <span
+              id="tab-badge"
+              class="hidden w-2 h-2 absolute rounded-full bg-[#e14b3b]"
+              style="top: 10px; left: calc(50% + 9px)"
+              aria-hidden="true"
+            />
           )}
           <Icon name={t.icon} size={22} />
           {t.label}

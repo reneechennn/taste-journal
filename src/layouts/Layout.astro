@@ -55,7 +55,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
                 <a
                   href={t.href}
                   class:list={[
-                    'px-5 py-2 rounded-full text-[15px] transition-all',
+                    'relative px-5 py-2 rounded-full text-[15px] transition-all',
                     active(t.href)
                       ? 'bg-card text-ink font-medium shadow-[0_1px_4px_rgba(70,55,40,0.12)]'
                       : 'text-soft hover:text-ink',
@@ -63,6 +63,13 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
                   aria-current={active(t.href) ? 'page' : undefined}
                 >
                   {t.label}
+                  {t.href === '/shopping' && (
+                    <span
+                      id="nav-badge"
+                      class="hidden absolute top-1.5 right-2.5 w-2 h-2 rounded-full bg-[#e14b3b]"
+                      aria-hidden="true"
+                    />
+                  )}
                 </a>
               ))
             }
