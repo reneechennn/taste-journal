@@ -88,6 +88,45 @@
         "番茄燉雞腿"
       ],
       "checked": true
+    },
+    {
+      "id": "geraawrmvrus09t",
+      "name": "兔子",
+      "qty": 1,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "2mx5nenmvrus09t",
+      "name": "蔥",
+      "qty": 3,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "hcfrpoemvrus09t",
+      "name": "鹽巴",
+      "qtyText": "少許",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "wga01xumvrus09t",
+      "name": "清酒",
+      "qty": 0.5,
+      "unit": "杯",
+      "sources": [
+        "test"
+      ],
+      "checked": false
     }
   ]
 }
