@@ -524,7 +524,7 @@ function setupDelegation(): void {
           const lines = collectCheckedLines()
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已將 ${n} 項食材加入採購清單`)
+          toast(`已將 ${n} 項食材加入採購清單`, 'ok')
           document.dispatchEvent(new CustomEvent('tj:state'))
           document.querySelectorAll<HTMLInputElement>('.ing-check').forEach((c) => (c.checked = false))
           updateIngCount()
@@ -538,7 +538,7 @@ function setupDelegation(): void {
           const lines = allLines(r)
           if (lines.length === 0) return
           const n = state.importToShopping(r.title, lines)
-          toast(`已將 ${n} 項食材加入採購清單`)
+          toast(`已將 ${n} 項食材加入採購清單`, 'ok')
           document.dispatchEvent(new CustomEvent('tj:state'))
           return
         }

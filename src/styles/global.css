@@ -306,6 +306,7 @@ main {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
     background: rgba(56, 56, 56, 0.96);
     color: #fdfaf4;
     border-radius: 9999px;
