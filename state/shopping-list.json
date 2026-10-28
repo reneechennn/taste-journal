@@ -1,3 +1,93 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "6ejxetwmvrur3ne",
+      "name": "雞腿",
+      "qty": 4,
+      "unit": "隻",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "thiyk5gmvrur3ne",
+      "name": "牛番茄",
+      "qty": 3,
+      "unit": "顆",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "o31qgk3mvrur3ne",
+      "name": "洋蔥",
+      "qty": 1,
+      "unit": "顆",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "bzdb9qumvrur3ne",
+      "name": "蒜頭",
+      "qty": 3,
+      "unit": "瓣",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "rrm1vi1mvrur3ne",
+      "name": "鹽",
+      "qty": 1,
+      "unit": "小匙",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "ttp929emvrur3ne",
+      "name": "黑胡椒",
+      "qtyText": "少許",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "n88q9avmvrur3ne",
+      "name": "番茄糊",
+      "qty": 2,
+      "unit": "大匙",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "u4voc72mvrur3ne",
+      "name": "橄欖油",
+      "qty": 30,
+      "unit": "ml",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "o846mxtmvrur3ne",
+      "name": "糖",
+      "qty": 1,
+      "unit": "小匙",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    }
+  ]
 }
