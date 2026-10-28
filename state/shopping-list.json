@@ -1,81 +1,22 @@
 {
   "items": [
     {
-      "id": "pytxen9mvrs0l17",
-      "name": "兔子",
-      "qty": 1,
-      "unit": "隻",
+      "id": "66sff4tmvrs19wn",
+      "name": "義大利麵",
+      "qty": 200,
+      "unit": "g",
       "sources": [
-        "test"
+        "蒜香蛤蜊麵"
       ],
       "checked": false
     },
     {
-      "id": "q9eqwyqmvrs0l17",
-      "name": "蔥",
-      "qty": 3,
-      "unit": "隻",
+      "id": "wxchgkhmvrs19wn",
+      "name": "蛤蜊",
+      "qty": 500,
+      "unit": "g",
       "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "t7s7qbwmvrs0l17",
-      "name": "鹽巴",
-      "qtyText": "少許",
-      "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "nxyabsamvrs0l17",
-      "name": "清酒",
-      "qty": 0.5,
-      "unit": "杯",
-      "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "eirn29rmvrs0uc4",
-      "name": "牛番茄",
-      "qty": 3,
-      "unit": "顆",
-      "sources": [
-        "番茄燉雞腿"
-      ],
-      "checked": false
-    },
-    {
-      "id": "o8c3iqhmvrs0uc4",
-      "name": "洋蔥",
-      "qty": 1,
-      "unit": "顆",
-      "sources": [
-        "番茄燉雞腿"
-      ],
-      "checked": false
-    },
-    {
-      "id": "snnq95umvrs0uc4",
-      "name": "鹽",
-      "qty": 1,
-      "unit": "小匙",
-      "sources": [
-        "番茄燉雞腿"
-      ],
-      "checked": false
-    },
-    {
-      "id": "2xvfau7mvrs0uc4",
-      "name": "糖",
-      "qty": 1,
-      "unit": "小匙",
-      "sources": [
-        "番茄燉雞腿"
+        "蒜香蛤蜊麵"
       ],
       "checked": false
     }
