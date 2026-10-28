@@ -9,7 +9,7 @@ time: 30
 source: "https://www.apple.com/tw/"
 servings: 2
 createdAt: "2026-10-28T07:10:13.275Z"
-updatedAt: "2026-10-28T07:10:13.275Z"
+updatedAt: "2026-10-28T12:20:06.493Z"
 ---
 
 ## 主食材
