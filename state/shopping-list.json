@@ -116,7 +116,7 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": true
     },
     {
       "id": "wga01xumvrus09t",
@@ -126,7 +126,7 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": true
     }
   ]
 }
