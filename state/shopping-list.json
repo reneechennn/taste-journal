@@ -52,7 +52,8 @@
       "sources": [
         "涼拌小黃瓜"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     },
     {
       "id": "i9y1crrmvrs6nky",
@@ -62,7 +63,8 @@
       "sources": [
         "涼拌小黃瓜"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     },
     {
       "id": "sggym80mvrs6nky",
@@ -71,6 +73,46 @@
       "unit": "支",
       "sources": [
         "涼拌小黃瓜"
+      ],
+      "checked": false,
+      "custom": false
+    },
+    {
+      "id": "8rwadwimvrsp33x",
+      "name": "兔子",
+      "qty": 1,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "72fgea0mvrsp33y",
+      "name": "蔥",
+      "qty": 3,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "d8s4cddmvrsp33y",
+      "name": "鹽巴",
+      "qtyText": "少許",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "ff8txgzmvrsp33y",
+      "name": "清酒",
+      "qty": 0.5,
+      "unit": "杯",
+      "sources": [
+        "test"
       ],
       "checked": false
     }
