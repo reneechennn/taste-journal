@@ -78,6 +78,45 @@
         "蒜香蛤蜊麵"
       ],
       "checked": false
+    },
+    {
+      "id": "64cdhikmvrvzs37",
+      "name": "兔子",
+      "qty": 1,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "mhfjlwpmvrvzs37",
+      "name": "蔥",
+      "qty": 3,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "fvwwtcimvrvzs37",
+      "name": "鹽巴",
+      "qtyText": "少許",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "hougsiymvrvzs37",
+      "name": "清酒",
+      "qty": 0.5,
+      "unit": "杯",
+      "sources": [
+        "test"
+      ],
+      "checked": false
     }
   ]
 }
