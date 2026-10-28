@@ -25,9 +25,11 @@ const current = existsSync(target)
   : null;
 
 const git = resolveGit();
+const repoName = git?.repo || current?.repo || 'taste-journal'
 const next = {
   owner: git?.owner || current?.owner || '',
-  repo: git?.repo || current?.repo || 'taste-journal',
+  repo: repoName,
+  dataRepo: `${repoName}-data`,
   branch:
     process.env.CF_PAGES_BRANCH ||
     process.env.CF_PAGES_COMMIT_REF ||

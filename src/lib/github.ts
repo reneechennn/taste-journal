@@ -5,10 +5,13 @@
 
 import repoCfg from '../config/repo.json'
 
-export const REPO = repoCfg as { owner: string; repo: string; branch: string }
+export const REPO = repoCfg as { owner: string; repo: string; branch: string; dataRepo: string }
 
-/** 狀態資料（採購清單、今日餐點）存放的分支：與網站內容（main）分離，避免狀態寫入觸發網站重建 */
-export const STATE_BRANCH = 'state-data'
+/** 狀態資料（採購清單、今日餐點）存放在獨立 repo（taste-journal-data）：
+ *  狀態寫入與 Cloudflare 完全無關，不會觸發網站重建，也不消耗建置額度 */
+export const DATA_REPO_OWNER = REPO.owner
+export const DATA_REPO = REPO.dataRepo
+export const STATE_BRANCH = 'main'
 
 const TOKEN_KEY = 'tj_token'
 const API = 'https://api.github.com'
@@ -86,11 +89,11 @@ async function ghFetch(path: string, init: RequestInit = {}): Promise<Response> 
 
 // ---------- 讀取 ----------
 
-const rawUrl = (path: string, branch: string = REPO.branch) =>
-  `https://raw.githubusercontent.com/${REPO.owner}/${REPO.repo}/${branch}/${encodeURI(path)}?v=${Date.now()}`
+const rawUrl = (path: string, branch: string = REPO.branch, repo: string = REPO.repo) =>
+  `https://raw.githubusercontent.com/${REPO.owner}/${repo}/${branch}/${encodeURI(path)}?v=${Date.now()}`
 
 /** 讀取 repo 裡的 JSON 檔（永遠最新版），失敗或不存在回 null */
-export async function readJSON<T>(path: string, branch: string = REPO.branch): Promise<T | null> {
+export async function readJSON<T>(path: string, branch: string = REPO.branch, repo: string = REPO.repo): Promise<T | null> {
   if (!REPO.owner) return null
 
   // 已登入時優先走 GitHub API：raw.githubusercontent 有最多 5 分鐘的 CDN 快取，
@@ -98,7 +101,7 @@ export async function readJSON<T>(path: string, branch: string = REPO.branch): P
   if (hasAuth()) {
     try {
       const r = await ghFetch(
-        `/repos/${REPO.owner}/${REPO.repo}/contents/${encodeURI(path)}?ref=${branch}&t=${Date.now()}`,
+        `/repos/${REPO.owner}/${repo}/contents/${encodeURI(path)}?ref=${branch}&t=${Date.now()}`,
       )
       if (r.status === 404) return null
       if (r.ok) {
@@ -112,7 +115,7 @@ export async function readJSON<T>(path: string, branch: string = REPO.branch): P
   }
 
   try {
-    const r = await fetch(rawUrl(path, branch), { cache: 'no-store' })
+    const r = await fetch(rawUrl(path, branch, repo), { cache: 'no-store' })
     if (!r.ok) return null
     return (await r.json()) as T
   } catch {
@@ -122,9 +125,9 @@ export async function readJSON<T>(path: string, branch: string = REPO.branch): P
 
 // ---------- 寫入（Contents API） ----------
 
-async function getContents(path: string, ref: string = REPO.branch): Promise<{ sha: string; data: any } | null> {
+async function getContents(path: string, ref: string = REPO.branch, repo: string = REPO.repo): Promise<{ sha: string; data: any } | null> {
   const r = await ghFetch(
-    `/repos/${REPO.owner}/${REPO.repo}/contents/${encodeURI(path)}?ref=${ref}&t=${Date.now()}`,
+    `/repos/${REPO.owner}/${repo}/contents/${encodeURI(path)}?ref=${ref}&t=${Date.now()}`,
   )
   if (r.status === 404) return null
   if (!r.ok) throw new Error(`GitHub 讀取失敗（${r.status}）`)
@@ -139,8 +142,9 @@ async function putContents(
   sha?: string,
   keepalive = false,
   branch: string = REPO.branch,
+  repo: string = REPO.repo,
 ): Promise<{ ok: boolean; status: number }> {
-  const r = await ghFetch(`/repos/${REPO.owner}/${REPO.repo}/contents/${encodeURI(path)}`, {
+  const r = await ghFetch(`/repos/${REPO.owner}/${repo}/contents/${encodeURI(path)}`, {
     method: 'PUT',
     keepalive,
     headers: { 'Content-Type': 'application/json' },
@@ -201,6 +205,7 @@ type WriteJob = {
   apply: (data: any, op: any) => any
   defaults: () => any
   branch: string
+  repo: string
 }
 const queue = new Map<string, WriteJob>()
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -209,11 +214,11 @@ let flushing = false
 export function writeJSON(
   path: string,
   op: any,
-  opts: { apply: (data: any, op: any) => any; defaults: () => any; branch?: string },
+  opts: { apply: (data: any, op: any) => any; defaults: () => any; branch?: string; repo?: string },
 ) {
   if (!REPO.owner || !hasAuth()) return
   let job = queue.get(path)
-  if (!job) queue.set(path, job = { ops: [], apply: opts.apply, defaults: opts.defaults, branch: opts.branch ?? REPO.branch })
+  if (!job) queue.set(path, job = { ops: [], apply: opts.apply, defaults: opts.defaults, branch: opts.branch ?? REPO.branch, repo: opts.repo ?? REPO.repo })
   job.ops.push(op)
   if (timer) clearTimeout(timer)
   timer = setTimeout(flushWrites, 400)
@@ -243,7 +248,7 @@ async function flushWrites() {
 
 async function writeStateNow(path: string, ops: any[], job: WriteJob) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    const cur = await getContents(path, job.branch) // 永遠抓最新的（已登入＝API 即時讀取）
+    const cur = await getContents(path, job.branch, job.repo) // 永遠抓最新的（已登入＝API 即時讀取）
     let data = cur?.data != null ? cur.data : job.defaults()
     for (const op of ops) data = job.apply(data, op)
     const msg = `[CI Skip] ${ops.length === 1 ? ops[0]._msg ?? '更新狀態' : ops[0]._msg ?? `更新狀態（${ops.length} 個動作）`}`
@@ -254,6 +259,7 @@ async function writeStateNow(path: string, ops: any[], job: WriteJob) {
       cur?.sha,
       true, // keepalive：頁面切換瞬間寫入也不中斷
       job.branch,
+      job.repo,
     )
     if (res.ok) return
     if (res.status === 409 || res.status === 422) continue // 衝突 → 重抓再套一次

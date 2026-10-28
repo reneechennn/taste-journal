@@ -6,7 +6,7 @@
 // 由 GitHub 端把動作套在最新資料上——多分頁／多裝置不會互相覆蓋。
 
 import type { CookCounts, IngredientLine, MenuFile, ShoppingFile, ShoppingItem } from './types'
-import { readJSON, writeJSON, STATE_BRANCH } from './github'
+import { readJSON, writeJSON, STATE_BRANCH, DATA_REPO } from './github'
 
 let menu: MenuFile = { date: '', recipes: [] }
 let counts: CookCounts = {}
@@ -52,9 +52,9 @@ function normalizeShopping(s: any): ShoppingFile {
 export async function loadState(): Promise<{ menu: MenuFile; counts: CookCounts; shopping: ShoppingFile }> {
   const date = todayKey()
   const [m, c, s] = await Promise.all([
-    readJSON<MenuFile>(`state/menu/${date}.json`, STATE_BRANCH),
-    readJSON<CookCounts>('state/cook-count.json', STATE_BRANCH),
-    readJSON<ShoppingFile>('state/shopping-list.json', STATE_BRANCH),
+    readJSON<MenuFile>(`state/menu/${date}.json`, STATE_BRANCH, DATA_REPO),
+    readJSON<CookCounts>('state/cook-count.json', STATE_BRANCH, DATA_REPO),
+    readJSON<ShoppingFile>('state/shopping-list.json', STATE_BRANCH, DATA_REPO),
   ])
   menu = normalizeMenu(m, date)
   counts = c && typeof c === 'object' ? c : {}
@@ -92,7 +92,7 @@ function menuDefaults(): MenuFile {
 }
 
 function scheduleMenuWrite(op: any) {
-  writeJSON(`state/menu/${menu.date || todayKey()}.json`, op, { apply: menuApply, defaults: menuDefaults, branch: STATE_BRANCH })
+  writeJSON(`state/menu/${menu.date || todayKey()}.json`, op, { apply: menuApply, defaults: menuDefaults, branch: STATE_BRANCH, repo: DATA_REPO })
 }
 
 export function toggleToday(slug: string): boolean {
@@ -128,7 +128,7 @@ function cookDefaults(): CookCounts {
 }
 
 function scheduleCookWrite(op: any) {
-  writeJSON('state/cook-count.json', op, { apply: cookApply, defaults: cookDefaults, branch: STATE_BRANCH })
+  writeJSON('state/cook-count.json', op, { apply: cookApply, defaults: cookDefaults, branch: STATE_BRANCH, repo: DATA_REPO })
 }
 
 function shoppingApply(data: any, op: any): ShoppingFile {
@@ -190,7 +190,7 @@ function shoppingDefaults(): ShoppingFile {
 }
 
 function scheduleShoppingWrite(op: any) {
-  writeJSON('state/shopping-list.json', op, { apply: shoppingApply, defaults: shoppingDefaults, branch: STATE_BRANCH })
+  writeJSON('state/shopping-list.json', op, { apply: shoppingApply, defaults: shoppingDefaults, branch: STATE_BRANCH, repo: DATA_REPO })
 }
 
 /** 把食材匯入採購清單（同名同單位自動加總、模糊描述保留文字） */
