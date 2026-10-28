@@ -1,3 +1,54 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "gv829fbmvrvdf8o",
+      "name": "雞腿",
+      "qty": 4,
+      "unit": "隻",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "ogtcbg5mvrvdf8o",
+      "name": "牛番茄",
+      "qty": 3,
+      "unit": "顆",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "ietw3r2mvrvdf8o",
+      "name": "洋蔥",
+      "qty": 1,
+      "unit": "顆",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "scc4hsdmvrvdf8o",
+      "name": "蒜頭",
+      "qty": 3,
+      "unit": "瓣",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "nm4e81kmvrvdf8o",
+      "name": "鹽",
+      "qty": 1,
+      "unit": "小匙",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    }
+  ]
 }
