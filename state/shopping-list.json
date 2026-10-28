@@ -82,7 +82,7 @@
     {
       "id": "64cdhikmvrvzs37",
       "name": "兔子",
-      "qty": 1,
+      "qty": 2,
       "unit": "隻",
       "sources": [
         "test"
@@ -92,7 +92,7 @@
     {
       "id": "mhfjlwpmvrvzs37",
       "name": "蔥",
-      "qty": 3,
+      "qty": 6,
       "unit": "隻",
       "sources": [
         "test"
@@ -111,7 +111,7 @@
     {
       "id": "hougsiymvrvzs37",
       "name": "清酒",
-      "qty": 0.5,
+      "qty": 1,
       "unit": "杯",
       "sources": [
         "test"
