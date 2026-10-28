@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://taste-journal.pages.dev',
+  site: 'https://tastejournal.pages.dev',
   vite: {
     plugins: [tailwindcss()],
   },

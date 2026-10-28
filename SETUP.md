@@ -49,7 +49,7 @@ npm run dev
 2. 授權 Cloudflare 存取你的 GitHub（第一次會跳 GitHub 頁面按 **Install & Authorize**）
 3. 選 `taste-journal` repo → **Begin setup**
 4. 設定頁：
-   - Project name：`taste-journal`（會決定你的免費網址 `taste-journal.pages.dev`，可以改）
+   - Project name：`taste-journal`（會決定你的免費網址 `tastejournal.pages.dev`，可以改）
    - Framework preset：**Astro**（會自動帶入 Build command `npm run build`、輸出資料夾 `dist`，不用改）
 5. 按 **Save and Deploy**，等 1-2 分鐘 ⏳
 6. 完成後打開 `https://你的名字.pages.dev` —— 網站上線了！🎉
