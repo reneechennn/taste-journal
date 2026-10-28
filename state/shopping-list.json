@@ -8,7 +8,7 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": false,
+      "checked": true,
       "custom": false
     },
     {
@@ -30,7 +30,7 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": false,
+      "checked": true,
       "custom": false
     },
     {
@@ -85,7 +85,8 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     },
     {
       "id": "gau5z61mvrspm5s",
@@ -95,7 +96,8 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     },
     {
       "id": "3apgz5nmvrspm5s",
@@ -104,7 +106,8 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     },
     {
       "id": "f44q8pxmvrspm5s",
@@ -114,7 +117,8 @@
       "sources": [
         "test"
       ],
-      "checked": false
+      "checked": false,
+      "custom": false
     }
   ]
 }
