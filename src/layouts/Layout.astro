@@ -24,9 +24,9 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#F7F3EC" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="味覺手帳" />
@@ -42,7 +42,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   <body>
     <IconSprite />
 
-    <header class="relative z-20 bg-card border-b border-line" style="padding-top: env(safe-area-inset-top)">
+    <header class="relative z-20 bg-paper border-b border-line" style="padding-top: env(safe-area-inset-top)">
       <div class="max-w-[1400px] mx-auto px-4 md:px-8 min-h-[68px] md:min-h-[80px] flex items-center justify-between gap-3 md:gap-6">
         <div class="flex items-center gap-3 md:gap-7 min-w-0">
           <a href="/" class="shrink-0 py-3">
