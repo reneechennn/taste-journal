@@ -241,7 +241,7 @@ async function writeStateNow(path: string, ops: any[], job: WriteJob) {
     const cur = await getContents(path) // 永遠抓最新的（已登入＝API 即時讀取）
     let data = cur?.data != null ? cur.data : job.defaults()
     for (const op of ops) data = job.apply(data, op)
-    const msg = ops.length === 1 ? ops[0]._msg ?? '更新狀態' : ops[0]._msg ?? `更新狀態（${ops.length} 個動作）`
+    const msg = `${ops.length === 1 ? ops[0]._msg ?? '更新狀態' : ops[0]._msg ?? `更新狀態（${ops.length} 個動作）`} [CI Skip]`
     const res = await putContents(
       path,
       b64encode(JSON.stringify(data, null, 2) + '\n'),
