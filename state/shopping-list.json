@@ -49,6 +49,25 @@
         "番茄燉雞腿"
       ],
       "checked": true
+    },
+    {
+      "id": "tl3p5m5mvrvdy8z",
+      "name": "蒜頭",
+      "qty": 5,
+      "unit": "瓣",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false
+    },
+    {
+      "id": "cfzx14kmvrvdy8z",
+      "name": "鹽",
+      "qtyText": "適量",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false
     }
   ]
 }
