@@ -1,17 +1,6 @@
 {
   "items": [
     {
-      "id": "66sff4tmvrs19wn",
-      "name": "義大利麵",
-      "qty": 200,
-      "unit": "g",
-      "sources": [
-        "蒜香蛤蜊麵"
-      ],
-      "checked": true,
-      "custom": false
-    },
-    {
       "id": "wxchgkhmvrs19wn",
       "name": "蛤蜊",
       "qty": 500,
@@ -20,17 +9,6 @@
         "蒜香蛤蜊麵"
       ],
       "checked": false,
-      "custom": false
-    },
-    {
-      "id": "sxt3pcamvrs26xb",
-      "name": "橄欖油",
-      "qty": 3,
-      "unit": "大匙",
-      "sources": [
-        "蒜香蛤蜊麵"
-      ],
-      "checked": true,
       "custom": false
     },
     {
@@ -45,32 +23,10 @@
       "custom": false
     },
     {
-      "id": "tsv6nrdmvrs6nky",
-      "name": "小黃瓜",
-      "qty": 3,
-      "unit": "條",
-      "sources": [
-        "涼拌小黃瓜"
-      ],
-      "checked": false,
-      "custom": false
-    },
-    {
       "id": "i9y1crrmvrs6nky",
       "name": "蒜頭",
       "qty": 2,
       "unit": "瓣",
-      "sources": [
-        "涼拌小黃瓜"
-      ],
-      "checked": false,
-      "custom": false
-    },
-    {
-      "id": "sggym80mvrs6nky",
-      "name": "辣椒",
-      "qty": 1,
-      "unit": "支",
       "sources": [
         "涼拌小黃瓜"
       ],
