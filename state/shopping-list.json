@@ -33,10 +33,11 @@
     {
       "id": "bzdb9qumvrur3ne",
       "name": "蒜頭",
-      "qty": 3,
+      "qty": 5,
       "unit": "瓣",
       "sources": [
-        "番茄燉雞腿"
+        "番茄燉雞腿",
+        "涼拌小黃瓜"
       ],
       "checked": true
     },
@@ -127,6 +128,26 @@
         "test"
       ],
       "checked": true
+    },
+    {
+      "id": "xm13h3wmvrusyft",
+      "name": "小黃瓜",
+      "qty": 3,
+      "unit": "條",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": false
+    },
+    {
+      "id": "pgrotlpmvrusyft",
+      "name": "辣椒",
+      "qty": 1,
+      "unit": "支",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": false
     }
   ]
 }
