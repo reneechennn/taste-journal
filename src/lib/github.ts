@@ -89,6 +89,25 @@ const rawUrl = (path: string) =>
 /** 讀取 repo 裡的 JSON 檔（永遠最新版），失敗或不存在回 null */
 export async function readJSON<T>(path: string): Promise<T | null> {
   if (!REPO.owner) return null
+
+  // 已登入時優先走 GitHub API：raw.githubusercontent 有最多 5 分鐘的 CDN 快取，
+  // 剛寫入的狀態可能讀到舊版；API 是即時的。
+  if (hasAuth()) {
+    try {
+      const r = await ghFetch(
+        `/repos/${REPO.owner}/${REPO.repo}/contents/${encodeURI(path)}?ref=${REPO.branch}&t=${Date.now()}`,
+      )
+      if (r.status === 404) return null
+      if (r.ok) {
+        const j = await r.json()
+        if (!j.content) return null
+        return JSON.parse(b64decode(j.content)) as T
+      }
+    } catch {
+      /* 落回 raw 讀取 */
+    }
+  }
+
   try {
     const r = await fetch(rawUrl(path), { cache: 'no-store' })
     if (!r.ok) return null
