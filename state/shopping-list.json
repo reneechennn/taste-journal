@@ -8,7 +8,7 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": true,
+      "checked": false,
       "custom": false
     },
     {
@@ -41,15 +41,38 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": true,
+      "checked": false,
       "custom": false
     },
     {
-      "id": "ooif88amvrs4v17",
-      "name": "橄欖油一瓶",
-      "sources": [],
-      "checked": false,
-      "custom": true
+      "id": "tsv6nrdmvrs6nky",
+      "name": "小黃瓜",
+      "qty": 3,
+      "unit": "條",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": false
+    },
+    {
+      "id": "i9y1crrmvrs6nky",
+      "name": "蒜頭",
+      "qty": 2,
+      "unit": "瓣",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": false
+    },
+    {
+      "id": "sggym80mvrs6nky",
+      "name": "辣椒",
+      "qty": 1,
+      "unit": "支",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": false
     }
   ]
 }
