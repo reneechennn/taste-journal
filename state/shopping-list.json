@@ -68,6 +68,16 @@
         "蒜香蛤蜊麵"
       ],
       "checked": false
+    },
+    {
+      "id": "wqpbj3dmvrvdzrr",
+      "name": "白酒",
+      "qty": 50,
+      "unit": "ml",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false
     }
   ]
 }
