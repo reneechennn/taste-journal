@@ -25,10 +25,11 @@
     {
       "id": "i9y1crrmvrs6nky",
       "name": "蒜頭",
-      "qty": 2,
+      "qty": 5,
       "unit": "瓣",
       "sources": [
-        "涼拌小黃瓜"
+        "涼拌小黃瓜",
+        "番茄燉雞腿"
       ],
       "checked": true,
       "custom": false
@@ -75,6 +76,35 @@
       ],
       "checked": true,
       "custom": false
+    },
+    {
+      "id": "qh1iitmmvrtdo8c",
+      "name": "牛番茄",
+      "qty": 3,
+      "unit": "顆",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "zg7an65mvrtdo8c",
+      "name": "黑胡椒",
+      "qtyText": "少許",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
+    },
+    {
+      "id": "2t28nxvmvrtdo8c",
+      "name": "橄欖油",
+      "qty": 30,
+      "unit": "ml",
+      "sources": [
+        "番茄燉雞腿"
+      ],
+      "checked": false
     }
   ]
 }
