@@ -1,6 +1,6 @@
 # AGENTS.md
 
-味覺手帳（Taste Journal）：Astro 5 純靜態食譜網站 + Cloudflare Pages。食譜是 GitHub repo 裡的 md 檔，執行期狀態存在 repo 內的 JSON。
+味覺手帳（Taste Journal）：Astro 5 純靜態食譜網站 + Cloudflare Pages。食譜是 GitHub repo（taste-journal）裡的 md 檔，執行期狀態存在**獨立 repo（taste-journal-data）**的 JSON。
 
 **使用者不是工程師**：一律用繁體中文回覆，技術決定要用白話解釋，不要假設對方看得懂程式碼。
 
@@ -16,7 +16,8 @@
 細節見 `ARCHITECTURE.md`；部署步驟見 `SETUP.md`。
 
 - 食譜＝`src/content/recipes/*.md`，**中文檔名就是 slug**（`src/content.config.ts` 的 generateId 保留原檔名）。frontmatter schema 也在該檔；body 固定用 `## 主食材 / ## 醃料 / ## 調味料 / ## 步驟` 分節（後兩者可省略），`*` 開頭的行＝小撇步。
-- 執行期狀態（今日餐點、烹調次數、採買清單）**不進建置流程**：存在 repo 的 `state/*.json`，前端用 raw.githubusercontent（加時間戳繞快取）讀、GitHub Contents API 寫（token 在 localStorage `tj_token`）。狀態變動**刻意不觸發重建**（省 Cloudflare 每月 500 次建置額度），不要改回 build-time。
+- 執行期狀態（今日餐點、烹調次數、採購清單）**不進建置流程**：存在**獨立 repo `taste-journal-data`** 的 `state/*.json`，前端讀取（登入時走 GitHub API 即時讀、未登入用 raw）與寫入（Contents API，token 在 localStorage `tj_token`）都指向該 repo。狀態寫入**完全不觸發 Cloudflare 建置**——曾因狀態寫入觸發建置燒額度，也發生過舊分頁整份蓋回資料的 bug，已用獨立 repo + 動作制寫入解決，不要改回同 repo 或快照式寫入。
+- 狀態寫入是「**動作制**」：`writeJSON` 收到的是使用者動作（op）+ 套用函式（apply），flush 時抓 GitHub 最新資料、依序套用動作再寫回；多分頁／多裝置不會互相覆蓋。切換頁面前要 `flushNow()` 等寫入完成（頁面腳本用 `onReady`）。
 - `scripts/resolve-repo.mjs` 從 `git remote` 解析 owner/repo → `src/config/repo.json`。**目前 repo 還沒有 remote** → owner 為空 → 狀態功能會靜默關閉（本機的正常現象）。本機要測寫入需在網址加 `?token=<PAT>`（scope `public_repo`）。
 - 唯一的動態端點是 Cloudflare Pages Function `functions/api/auth/[action].ts`（GitHub OAuth，env：`GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`）。讀取永遠不需要登入。
 - **雙重渲染陷阱**：食譜卡片同時存在 `src/components/RecipeCard.astro`（SSR）與 `src/lib/ui.ts` 的 `recipeCardHtml()`（前端重排用），改卡片一定兩邊同步改。食譜資料以 `<script type="application/json" id="recipes-data">` 島嵌入 index/search；編輯頁抓 `/recipes.json`。

@@ -72,17 +72,17 @@ updatedAt: "…"
 |---|---|
 | `src/lib/parser.ts` | 自然語言智慧解析 + 排版工具 |
 | `src/lib/github.ts` | repo 設定、OAuth token、讀寫佇列 |
-| `src/lib/state.ts` | 今日餐點 / 烹調次數 / 採買清單操作 |
+| `src/lib/state.ts` | 今日餐點 / 烹調次數 / 採購清單操作 |
 | `src/lib/ui.ts` | 事件代理、食譜 Modal、Toast、確認視窗、卡片渲染 |
 | `src/components/EditForm.astro` | 客製編輯頁（即時解析預覽、照片壓縮上傳、防呆刪除） |
 | `src/pages/index.astro` | 首頁（今日餐點 + 食譜列表：最近新增/經常烹調 + 分類篩選） |
 | `src/pages/search.astro` | 搜尋（多關鍵字 + 類型 Pills + 菜系 + 8 分類插畫 + ↺ 清除篩選） |
-| `src/pages/shopping.astro` | 採買清單 |
+| `src/pages/shopping.astro` | 採購清單 |
 | `scripts/resolve-repo.mjs` | 建置前自動解析 git remote → `src/config/repo.json`（前端就知道要同步哪個 repo） |
 
 ## 設計決策紀錄
 
-- **狀態存 GitHub 而非 localStorage**：滿足「跨裝置同步」核心需求；repo 公開（看不用登入、改需授權，採買清單非敏感資料）
+- **狀態存 GitHub 而非 localStorage**：滿足「跨裝置同步」核心需求；repo 公開（看不用登入、改需授權，採購清單非敏感資料）
 - **狀態寫入不觸發重建**：前端直連 GitHub API，避開每月 500 次重建額度
 - **照片上傳自動壓縮**（1600px 全圖 + 480px 縮圖）：100 張照片僅 ~30MB，遠離 GitHub 1GB 建議上限
 - **中文檔名 = 食譜 slug**：編輯頁用 `?s=` query 避開路徑編碼問題
