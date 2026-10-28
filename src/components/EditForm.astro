@@ -184,6 +184,10 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
     ;($('f-category') as HTMLSelectElement).value = r.category
     ;($('f-type') as HTMLSelectElement).value = r.type
     ;($('f-cuisine') as HTMLSelectElement).value = r.cuisine
+    // 自訂下拉外殼要收到 change 事件才會更新顯示
+    for (const id of ['f-category', 'f-type', 'f-cuisine']) {
+      $(id).dispatchEvent(new Event('change', { bubbles: true }))
+    }
     if (r.time) ($('f-time') as HTMLInputElement).value = String(r.time)
     if (r.source) ($('f-source') as HTMLInputElement).value = r.source
     ;($('f-servings') as HTMLInputElement).value = String(r.servings || 4)
