@@ -1,0 +1,43 @@
+{
+  "items": [
+    {
+      "id": "pytxen9mvrs0l17",
+      "name": "兔子",
+      "qty": 1,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "q9eqwyqmvrs0l17",
+      "name": "蔥",
+      "qty": 3,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "t7s7qbwmvrs0l17",
+      "name": "鹽巴",
+      "qtyText": "少許",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    },
+    {
+      "id": "nxyabsamvrs0l17",
+      "name": "清酒",
+      "qty": 0.5,
+      "unit": "杯",
+      "sources": [
+        "test"
+      ],
+      "checked": false
+    }
+  ]
+}
