@@ -136,10 +136,11 @@ function shoppingApply(data: any, op: any): ShoppingFile {
   switch (op.type) {
     case 'import': {
       // 把一行行食材套到「最新」的清單上（同名同單位加總、模糊描述合併來源）
+      // 已勾選（買完了）的項目不合併——新加入的另開一筆
       for (const line of op.lines ?? []) {
         if (!line?.name) continue
         const existing = items.find((it) => {
-          if (it.custom || !it.name || it.name !== line.name) return false
+          if (it.custom || !it.name || it.name !== line.name || it.checked) return false
           if (line.qty != null && it.qty != null) return it.unit === line.unit
           if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
           return false
@@ -198,8 +199,9 @@ export function importToShopping(sourceTitle: string, lines: IngredientLine[]): 
   const withIds = lines.map((line) => ({ ...line, _id: uid() }))
   for (const line of withIds) {
     if (!line.name) continue
+    // 已勾選（買完）的項目不合併，新加入的永遠是獨立一筆
     const existing = shopping.items.find((it) => {
-      if (it.custom || !it.name || it.name !== line.name) return false
+      if (it.custom || !it.name || it.name !== line.name || it.checked) return false
       if (line.qty != null && it.qty != null) return it.unit === line.unit
       if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
       return false
