@@ -8,7 +8,7 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": false,
+      "checked": true,
       "custom": false
     },
     {
@@ -19,7 +19,7 @@
       "sources": [
         "蒜香蛤蜊麵"
       ],
-      "checked": false,
+      "checked": true,
       "custom": false
     },
     {
@@ -43,45 +43,6 @@
       ],
       "checked": false,
       "custom": false
-    },
-    {
-      "id": "vrsq395mvrs2x0y",
-      "name": "兔子",
-      "qty": 1,
-      "unit": "隻",
-      "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "3wv723lmvrs2x0y",
-      "name": "蔥",
-      "qty": 3,
-      "unit": "隻",
-      "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "vr8s8xcmvrs2x0y",
-      "name": "鹽巴",
-      "qtyText": "少許",
-      "sources": [
-        "test"
-      ],
-      "checked": false
-    },
-    {
-      "id": "0pxla44mvrs2x0y",
-      "name": "清酒",
-      "qty": 0.5,
-      "unit": "杯",
-      "sources": [
-        "test"
-      ],
-      "checked": false
     }
   ]
 }
