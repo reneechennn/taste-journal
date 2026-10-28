@@ -1,11 +1,12 @@
 // ============ 味覺手帳 · 狀態管理 ============
 // 今日餐點（每日歸檔）、烹調次數、採購清單。
-// 全部存在 GitHub repo 的 state/ 資料夾，跨裝置同步。
+// 全部存在 GitHub 獨立 repo（taste-journal-data）的 state/ 資料夾，跨裝置同步。
 //
 // 寫入採「動作制」：上傳的是使用者剛做的動作（加入、勾選、清空⋯），
 // 由 GitHub 端把動作套在最新資料上——多分頁／多裝置不會互相覆蓋。
 
 import type { CookCounts, IngredientLine, MenuFile, ShoppingFile, ShoppingItem } from './types'
+import { parseIngredientLine } from './parser'
 import { readJSON, writeJSON, STATE_BRANCH, DATA_REPO } from './github'
 
 let menu: MenuFile = { date: '', recipes: [] }
@@ -131,37 +132,38 @@ function scheduleCookWrite(op: any) {
   writeJSON('state/cook-count.json', op, { apply: cookApply, defaults: cookDefaults, branch: STATE_BRANCH, repo: DATA_REPO })
 }
 
+/** 把一行食材併入清單（同名同單位加總、模糊描述合併來源；已勾選的項目不合併） */
+function mergeShoppingLine(items: ShoppingItem[], line: IngredientLine, source?: string): void {
+  if (!line.name) return
+  const existing = items.find((it) => {
+    if (!it.name || it.name !== line.name || it.checked) return false
+    if (line.qty != null && it.qty != null) return it.unit === line.unit
+    if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
+    return false
+  })
+  if (existing) {
+    if (line.qty != null && existing.qty != null) existing.qty = existing.qty + line.qty
+    if (source && !existing.sources.includes(source)) existing.sources.push(source)
+  } else {
+    const id = (line as any)._id
+    items.push({
+      id: typeof id === 'string' && id ? id : uid(),
+      name: line.name,
+      qty: line.qty,
+      unit: line.unit,
+      qtyText: line.qtyText,
+      sources: source ? [source] : [],
+      checked: false,
+    })
+  }
+}
+
 function shoppingApply(data: any, op: any): ShoppingFile {
   let items: ShoppingItem[] = data && typeof data === 'object' && Array.isArray(data.items) ? data.items : []
   switch (op.type) {
-    case 'import': {
-      // 把一行行食材套到「最新」的清單上（同名同單位加總、模糊描述合併來源）
-      // 已勾選（買完了）的項目不合併——新加入的另開一筆
-      for (const line of op.lines ?? []) {
-        if (!line?.name) continue
-        const existing = items.find((it) => {
-          if (it.custom || !it.name || it.name !== line.name || it.checked) return false
-          if (line.qty != null && it.qty != null) return it.unit === line.unit
-          if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
-          return false
-        })
-        if (existing) {
-          if (line.qty != null && existing.qty != null) existing.qty = existing.qty + line.qty
-          if (!existing.sources.includes(op.source)) existing.sources.push(op.source)
-        } else {
-          items.push({
-            id: typeof line._id === 'string' && line._id ? line._id : uid(),
-            name: line.name,
-            qty: line.qty,
-            unit: line.unit,
-            qtyText: line.qtyText,
-            sources: [op.source],
-            checked: false,
-          })
-        }
-      }
+    case 'import':
+      for (const line of op.lines ?? []) mergeShoppingLine(items, line, op.source)
       break
-    }
     case 'toggle': {
       const it = items.find((i) => i.id === op.id)
       if (it) it.checked = !it.checked
@@ -171,9 +173,7 @@ function shoppingApply(data: any, op: any): ShoppingFile {
       items = items.filter((i) => i.id !== op.id)
       break
     case 'add-custom':
-      if (op.name && String(op.name).trim()) {
-        items.push({ id: typeof op.id === 'string' ? op.id : uid(), name: String(op.name).trim(), sources: [], checked: false, custom: true })
-      }
+      mergeShoppingLine(items, op.line ?? {}, undefined)
       break
     case 'clear-done':
       items = items.filter((i) => !i.checked)
@@ -199,27 +199,7 @@ export function importToShopping(sourceTitle: string, lines: IngredientLine[]): 
   const withIds = lines.map((line) => ({ ...line, _id: uid() }))
   for (const line of withIds) {
     if (!line.name) continue
-    // 已勾選（買完）的項目不合併，新加入的永遠是獨立一筆
-    const existing = shopping.items.find((it) => {
-      if (it.custom || !it.name || it.name !== line.name || it.checked) return false
-      if (line.qty != null && it.qty != null) return it.unit === line.unit
-      if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
-      return false
-    })
-    if (existing) {
-      if (line.qty != null && existing.qty != null) existing.qty = existing.qty + line.qty
-      if (!existing.sources.includes(sourceTitle)) existing.sources.push(sourceTitle)
-    } else {
-      shopping.items.push({
-        id: line._id,
-        name: line.name,
-        qty: line.qty,
-        unit: line.unit,
-        qtyText: line.qtyText,
-        sources: [sourceTitle],
-        checked: false,
-      })
-    }
+    mergeShoppingLine(shopping.items, line, sourceTitle)
     added++
   }
   scheduleShoppingWrite({ type: 'import', source: sourceTitle, lines: withIds, _msg: `加入採購清單（${sourceTitle}）` })
@@ -238,12 +218,17 @@ export function removeShoppingItem(id: string) {
   scheduleShoppingWrite({ type: 'remove', id, _msg: '刪除採購項目' })
 }
 
+/** 手動新增項目：也走智慧解析（「橄欖油 一瓶」→ 名稱＋數量），並與未勾選的同名項目合併 */
 export function addCustomItem(name: string) {
   const n = name.trim()
   if (!n) return
+  const parsed = parseIngredientLine(n)
+  const line: IngredientLine =
+    parsed.name && (parsed.qty != null || parsed.qtyText) ? parsed : { raw: n, name: n }
   const id = uid()
-  shopping.items.push({ id, name: n, sources: [], checked: false, custom: true })
-  scheduleShoppingWrite({ type: 'add-custom', name: n, id, _msg: '新增採購項目' })
+  const withId: IngredientLine = { ...line, _id: id }
+  mergeShoppingLine(shopping.items, withId, undefined)
+  scheduleShoppingWrite({ type: 'add-custom', line: withId, id, _msg: '新增採購項目' })
 }
 
 export function clearDoneItems() {
