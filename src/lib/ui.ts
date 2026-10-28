@@ -632,6 +632,21 @@ export function initUI(): void {
     updateBadge()
   })
 
+  // 回到這個分頁時，先補送寫入、再重新同步 GitHub 上的最新狀態
+  // （避免停留很久的分頁拿著舊資料寫回去）
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !REPO.owner || !hasAuth()) return
+    void flushNow()
+      .then(() => state.loadState())
+      .then(() => {
+        window.TJ.state = state.snapshot()
+        document.dispatchEvent(new CustomEvent('tj:state'))
+        refreshChefButtons()
+        updateBadge()
+      })
+      .catch(() => null)
+  })
+
   refreshAuthChip()
   if (captured) toast('登入成功，這台裝置已記住', 'ok')
   consumeKeepToast()

@@ -187,21 +187,29 @@ export async function uploadImage(path: string, dataUrl: string, message: string
   return res.ok
 }
 
-// ---------- 狀態 JSON 寫入佇列（debounce + 衝突重試） ----------
-// 採購清單勾勾、今日餐點切換這類快速操作，會先彙整再一次性送出。
+// ---------- 狀態 JSON 寫入佇列（動作制：衝突安全 + debounce） ----------
+// 寫入的不是「整份資料的快照」，而是使用者剛做的「動作」。
+// flush 時先抓 GitHub 上最新的資料，把動作依序套上去再寫回——
+// 這樣多個分頁／多台裝置同時操作時，不會有舊分頁把舊資料整份蓋回去的問題。
 
-type WriteJob = { getData: () => any; message: string; merge?: (remote: any, ours: any) => any }
+type WriteJob = {
+  ops: any[]
+  apply: (data: any, op: any) => any
+  defaults: () => any
+}
 const queue = new Map<string, WriteJob>()
 let timer: ReturnType<typeof setTimeout> | null = null
 let flushing = false
 
 export function writeJSON(
   path: string,
-  getData: () => any,
-  opts: { message: string; merge?: (remote: any, ours: any) => any },
+  op: any,
+  opts: { apply: (data: any, op: any) => any; defaults: () => any },
 ) {
   if (!REPO.owner || !hasAuth()) return
-  queue.set(path, { getData, message: opts.message, merge: opts.merge })
+  let job = queue.get(path)
+  if (!job) queue.set(path, job = { ops: [], apply: opts.apply, defaults: opts.defaults })
+  job.ops.push(op)
   if (timer) clearTimeout(timer)
   timer = setTimeout(flushWrites, 400)
 }
@@ -211,11 +219,16 @@ async function flushWrites() {
   flushing = true
   try {
     for (const [path, job] of [...queue.entries()]) {
-      queue.delete(path)
+      if (job.ops.length === 0) continue
+      const ops = job.ops.splice(0) // 取走排隊的動作；flush 期間新動作會留在 job.ops
       try {
-        await writeJsonNow(path, job)
+        await writeStateNow(path, ops, job)
       } catch (err) {
         console.error('[taste-journal] 寫入失敗:', path, err)
+        // 失敗的動作放回佇列，安排重試
+        job.ops.unshift(...ops)
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(flushWrites, 2500)
       }
     }
   } finally {
@@ -223,22 +236,21 @@ async function flushWrites() {
   }
 }
 
-async function writeJsonNow(path: string, job: WriteJob) {
-  const data = job.getData()
-  if (data == null) return
+async function writeStateNow(path: string, ops: any[], job: WriteJob) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    const cur = await getContents(path)
-    const finalData =
-      cur?.data != null && job.merge ? job.merge(cur.data, data) : data
+    const cur = await getContents(path) // 永遠抓最新的（已登入＝API 即時讀取）
+    let data = cur?.data != null ? cur.data : job.defaults()
+    for (const op of ops) data = job.apply(data, op)
+    const msg = ops.length === 1 ? ops[0]._msg ?? '更新狀態' : ops[0]._msg ?? `更新狀態（${ops.length} 個動作）`
     const res = await putContents(
       path,
-      b64encode(JSON.stringify(finalData, null, 2) + '\n'),
-      job.message,
+      b64encode(JSON.stringify(data, null, 2) + '\n'),
+      msg,
       cur?.sha,
       true, // keepalive：頁面切換瞬間寫入也不中斷
     )
     if (res.ok) return
-    if (res.status === 409 || res.status === 422) continue // 衝突 → 重抓再試
+    if (res.status === 409 || res.status === 422) continue // 衝突 → 重抓再套一次
     throw new Error(`寫入失敗（HTTP ${res.status}）`)
   }
   throw new Error('寫入衝突，重試後仍失敗')

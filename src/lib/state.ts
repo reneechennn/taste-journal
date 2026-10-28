@@ -1,6 +1,9 @@
 // ============ 味覺手帳 · 狀態管理 ============
 // 今日餐點（每日歸檔）、烹調次數、採購清單。
 // 全部存在 GitHub repo 的 state/ 資料夾，跨裝置同步。
+//
+// 寫入採「動作制」：上傳的是使用者剛做的動作（加入、勾選、清空⋯），
+// 由 GitHub 端把動作套在最新資料上——多分頁／多裝置不會互相覆蓋。
 
 import type { CookCounts, IngredientLine, MenuFile, ShoppingFile, ShoppingItem } from './types'
 import { readJSON, writeJSON } from './github'
@@ -74,42 +77,126 @@ export function inToday(slug: string): boolean {
   return menu.recipes.includes(slug)
 }
 
-function scheduleMenuWrite() {
-  writeJSON(`state/menu/${menu.date || todayKey()}.json`, () => menu, {
-    message: `更新今日餐點（${menu.date}）`,
-  })
+function menuApply(data: any, op: any): MenuFile {
+  const date = typeof op?.date === 'string' && op.date ? op.date : todayKey()
+  const m: MenuFile = data && typeof data === 'object' && Array.isArray(data.recipes)
+    ? { date: typeof data.date === 'string' && data.date ? data.date : date, recipes: data.recipes }
+    : { date, recipes: [] }
+  if (op.type === 'menu-add' && !m.recipes.includes(op.slug)) m.recipes.push(String(op.slug))
+  if (op.type === 'menu-remove') m.recipes = m.recipes.filter((s: unknown) => s !== op.slug)
+  return m
 }
 
-/** 切換加入／移出今日餐點。回傳 true = 加入（此時烹調次數 +1） */
+function menuDefaults(): MenuFile {
+  return { date: menu.date || todayKey(), recipes: [] }
+}
+
+function scheduleMenuWrite(op: any) {
+  writeJSON(`state/menu/${menu.date || todayKey()}.json`, op, { apply: menuApply, defaults: menuDefaults })
+}
+
 export function toggleToday(slug: string): boolean {
   const was = inToday(slug)
   if (was) {
     menu = { ...menu, recipes: menu.recipes.filter((s) => s !== slug) }
+    scheduleMenuWrite({ type: 'menu-remove', slug, date: menu.date, _msg: `更新今日餐點（${menu.date}）` })
   } else {
     menu = { ...menu, recipes: [...menu.recipes, slug] }
     counts = { ...counts, [slug]: (counts[slug] ?? 0) + 1 }
-    writeJSON('state/cook-count.json', () => counts, {
-      message: `烹調次數 +1（${slug}）`,
-      // 和別台裝置同時更新時，保留對方的紀錄再疊上自己的
-      merge: (remote, ours) => ({ ...(remote ?? {}), ...ours }),
-    })
+    scheduleMenuWrite({ type: 'menu-add', slug, date: menu.date, _msg: `更新今日餐點（${menu.date}）` })
+    scheduleCookWrite({ type: 'inc', slug, _msg: `烹調次數 +1（${slug}）` })
   }
-  scheduleMenuWrite()
   return !was
 }
 
 export function removeToday(slug: string) {
   if (!inToday(slug)) return
   menu = { ...menu, recipes: menu.recipes.filter((s) => s !== slug) }
-  scheduleMenuWrite()
+  scheduleMenuWrite({ type: 'menu-remove', slug, date: menu.date, _msg: `更新今日餐點（${menu.date}）` })
 }
 
 // ---------- 採購清單 ----------
 
+function cookApply(data: any, op: any): CookCounts {
+  const counts = data && typeof data === 'object' ? { ...data } : {}
+  if (op.type === 'inc' && typeof op.slug === 'string') counts[op.slug] = (counts[op.slug] ?? 0) + 1
+  return counts
+}
+
+function cookDefaults(): CookCounts {
+  return {}
+}
+
+function scheduleCookWrite(op: any) {
+  writeJSON('state/cook-count.json', op, { apply: cookApply, defaults: cookDefaults })
+}
+
+function shoppingApply(data: any, op: any): ShoppingFile {
+  let items: ShoppingItem[] = data && typeof data === 'object' && Array.isArray(data.items) ? data.items : []
+  switch (op.type) {
+    case 'import': {
+      // 把一行行食材套到「最新」的清單上（同名同單位加總、模糊描述合併來源）
+      for (const line of op.lines ?? []) {
+        if (!line?.name) continue
+        const existing = items.find((it) => {
+          if (it.custom || !it.name || it.name !== line.name) return false
+          if (line.qty != null && it.qty != null) return it.unit === line.unit
+          if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
+          return false
+        })
+        if (existing) {
+          if (line.qty != null && existing.qty != null) existing.qty = existing.qty + line.qty
+          if (!existing.sources.includes(op.source)) existing.sources.push(op.source)
+        } else {
+          items.push({
+            id: typeof line._id === 'string' && line._id ? line._id : uid(),
+            name: line.name,
+            qty: line.qty,
+            unit: line.unit,
+            qtyText: line.qtyText,
+            sources: [op.source],
+            checked: false,
+          })
+        }
+      }
+      break
+    }
+    case 'toggle': {
+      const it = items.find((i) => i.id === op.id)
+      if (it) it.checked = !it.checked
+      break
+    }
+    case 'remove':
+      items = items.filter((i) => i.id !== op.id)
+      break
+    case 'add-custom':
+      if (op.name && String(op.name).trim()) {
+        items.push({ id: typeof op.id === 'string' ? op.id : uid(), name: String(op.name).trim(), sources: [], checked: false, custom: true })
+      }
+      break
+    case 'clear-done':
+      items = items.filter((i) => !i.checked)
+      break
+    case 'clear-all':
+      items = []
+      break
+  }
+  return { items }
+}
+
+function shoppingDefaults(): ShoppingFile {
+  return { items: [] }
+}
+
+function scheduleShoppingWrite(op: any) {
+  writeJSON('state/shopping-list.json', op, { apply: shoppingApply, defaults: shoppingDefaults })
+}
+
 /** 把食材匯入採購清單（同名同單位自動加總、模糊描述保留文字） */
 export function importToShopping(sourceTitle: string, lines: IngredientLine[]): number {
   let added = 0
-  for (const line of lines) {
+  const withIds = lines.map((line) => ({ ...line, _id: uid() }))
+  for (const line of withIds) {
     if (!line.name) continue
     const existing = shopping.items.find((it) => {
       if (it.custom || !it.name || it.name !== line.name) return false
@@ -122,7 +209,7 @@ export function importToShopping(sourceTitle: string, lines: IngredientLine[]): 
       if (!existing.sources.includes(sourceTitle)) existing.sources.push(sourceTitle)
     } else {
       shopping.items.push({
-        id: uid(),
+        id: line._id,
         name: line.name,
         qty: line.qty,
         unit: line.unit,
@@ -133,39 +220,36 @@ export function importToShopping(sourceTitle: string, lines: IngredientLine[]): 
     }
     added++
   }
-  scheduleShoppingWrite(`加入採購清單（${sourceTitle}）`)
+  scheduleShoppingWrite({ type: 'import', source: sourceTitle, lines: withIds, _msg: `加入採購清單（${sourceTitle}）` })
   return added
-}
-
-function scheduleShoppingWrite(message = '更新採購清單') {
-  writeJSON('state/shopping-list.json', () => shopping, { message })
 }
 
 export function toggleShoppingItem(id: string) {
   const it = shopping.items.find((i) => i.id === id)
   if (!it) return
   it.checked = !it.checked
-  scheduleShoppingWrite()
+  scheduleShoppingWrite({ type: 'toggle', id, _msg: '更新採購清單' })
 }
 
 export function removeShoppingItem(id: string) {
   shopping = { items: shopping.items.filter((i) => i.id !== id) }
-  scheduleShoppingWrite()
+  scheduleShoppingWrite({ type: 'remove', id, _msg: '刪除採購項目' })
 }
 
 export function addCustomItem(name: string) {
   const n = name.trim()
   if (!n) return
-  shopping.items.push({ id: uid(), name: n, sources: [], checked: false, custom: true })
-  scheduleShoppingWrite()
+  const id = uid()
+  shopping.items.push({ id, name: n, sources: [], checked: false, custom: true })
+  scheduleShoppingWrite({ type: 'add-custom', name: n, id, _msg: '新增採購項目' })
 }
 
 export function clearDoneItems() {
   shopping = { items: shopping.items.filter((i) => !i.checked) }
-  scheduleShoppingWrite('清空已完成項目')
+  scheduleShoppingWrite({ type: 'clear-done', _msg: '清空已完成項目' })
 }
 
 export function clearAllItems() {
   shopping = { items: [] }
-  scheduleShoppingWrite('清空採購清單')
+  scheduleShoppingWrite({ type: 'clear-all', _msg: '清空採購清單' })
 }
