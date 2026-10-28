@@ -2,7 +2,7 @@
 // 事件代理、食譜 Modal、Toast、確認視窗、卡片渲染、登入流程。
 
 import type { IngredientLine, Recipe } from './types'
-import { REPO, captureToken, hasAuth, login, logout } from './github'
+import { REPO, captureToken, hasAuth, login, logout, flushNow, hasPendingWrites } from './github'
 import * as state from './state'
 import { sp, scaledText } from './parser'
 
@@ -461,6 +461,22 @@ function setupDelegation(): void {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
     const actEl = target.closest('[data-action]') as HTMLElement | null
+
+    // 點內部連結切換頁面前，先等排隊中的狀態寫入完成（避免下一頁讀到舊資料）
+    if (!actEl) {
+      const anchor = target.closest('a[href]') as HTMLAnchorElement | null
+      if (anchor && !anchor.target && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+        const href = anchor.getAttribute('href') ?? ''
+        if (href.startsWith('/') && !href.startsWith('//') && hasPendingWrites()) {
+          e.preventDefault()
+          void flushNow().finally(() => {
+            location.href = href
+          })
+          return
+        }
+      }
+    }
+
     if (actEl) {
       const a = actEl.dataset.action ?? ''
       const slug = actEl.dataset.slug
@@ -476,7 +492,10 @@ function setupDelegation(): void {
           return
         case 'edit-recipe':
           e.preventDefault()
-          location.href = slug ? `/edit?s=${encodeURIComponent(slug)}` : '/edit'
+          // 先確保排隊中的狀態寫入完成，避免下一頁讀到舊資料
+          void (hasPendingWrites() ? flushNow() : Promise.resolve()).then(() => {
+            location.href = slug ? `/edit?s=${encodeURIComponent(slug)}` : '/edit'
+          })
           return
         case 'close-modal':
           e.preventDefault()

@@ -184,7 +184,7 @@ export function writeJSON(
   if (!REPO.owner || !hasAuth()) return
   queue.set(path, { getData, message: opts.message, merge: opts.merge })
   if (timer) clearTimeout(timer)
-  timer = setTimeout(flushWrites, 700)
+  timer = setTimeout(flushWrites, 400)
 }
 
 async function flushWrites() {
@@ -233,6 +233,26 @@ window.addEventListener('pagehide', () => {
     void flushWrites()
   }
 })
+
+// ---------- 給頁面切換用的「保證寫完」工具 ----------
+
+/** 是否還有排隊中的寫入 */
+export function hasPendingWrites(): boolean {
+  return queue.size > 0
+}
+
+/** 立刻把所有排隊寫入送出，並等到真的完成（供切換頁面前呼叫） */
+export async function flushNow(): Promise<void> {
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
+  // 若已有進行中的 flush，等它結束再補送
+  while (flushing) {
+    await new Promise((r) => setTimeout(r, 50))
+  }
+  await flushWrites()
+}
 
 // ---------- 使用者身分 ----------
 
