@@ -69,6 +69,14 @@ function b64decode(b64: string): string {
   return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)))
 }
 
+function safeParseJson(text: string): any {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 function authHeaders(): Record<string, string> {
   const t = getToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
@@ -100,15 +108,10 @@ export async function readJSON<T>(path: string, branch: string = REPO.branch, re
   // 剛寫入的狀態可能讀到舊版；API 是即時的。
   if (hasAuth()) {
     try {
-      const r = await ghFetch(
-        `/repos/${REPO.owner}/${repo}/contents/${encodeURI(path)}?ref=${branch}&t=${Date.now()}`,
-      )
-      if (r.status === 404) return null
-      if (r.ok) {
-        const j = await r.json()
-        if (!j.content) return null
-        return JSON.parse(b64decode(j.content)) as T
-      }
+      const cur = await getContentsRaw(path, branch, repo)
+      if (!cur) return null
+      if (cur.text != null) return JSON.parse(cur.text) as T
+      return null
     } catch {
       /* 落回 raw 讀取 */
     }
@@ -125,14 +128,15 @@ export async function readJSON<T>(path: string, branch: string = REPO.branch, re
 
 // ---------- 寫入（Contents API） ----------
 
-async function getContents(path: string, ref: string = REPO.branch, repo: string = REPO.repo): Promise<{ sha: string; data: any } | null> {
+/** 讀取檔案的 sha 與原始文字（不解析內容——檔案可能是 md 而非 JSON） */
+async function getContentsRaw(path: string, ref: string = REPO.branch, repo: string = REPO.repo): Promise<{ sha: string; text: string | null } | null> {
   const r = await ghFetch(
     `/repos/${REPO.owner}/${repo}/contents/${encodeURI(path)}?ref=${ref}&t=${Date.now()}`,
   )
   if (r.status === 404) return null
   if (!r.ok) throw new Error(`GitHub 讀取失敗（${r.status}）`)
   const j = await r.json()
-  return { sha: j.sha, data: j.content ? JSON.parse(b64decode(j.content)) : null }
+  return { sha: j.sha, text: j.content ? b64decode(j.content) : null }
 }
 
 async function putContents(
@@ -155,7 +159,7 @@ async function putContents(
 
 /** 刪除檔案（例如刪食譜） */
 export async function deleteFile(path: string, message: string): Promise<boolean> {
-  const cur = await getContents(path)
+  const cur = await getContentsRaw(path)
   if (!cur) return true // 本來就不存在
   const r = await ghFetch(`/repos/${REPO.owner}/${REPO.repo}/contents/${encodeURI(path)}`, {
     method: 'DELETE',
@@ -173,7 +177,7 @@ export async function writeTextFile(
   message: string,
   opts: { create?: boolean } = {},
 ): Promise<{ ok: boolean; conflict: boolean; error?: string }> {
-  const cur = await getContents(path)
+  const cur = await getContentsRaw(path)
   if (opts.create && cur) return { ok: false, conflict: true }
   const content = b64encode(text)
   let res = await putContents(path, content, message, cur?.sha)
@@ -181,7 +185,7 @@ export async function writeTextFile(
   if (res.status === 409 || res.status === 422) {
     if (opts.create) return { ok: false, conflict: true }
     // 更新衝突（別的裝置先寫了）→ 重新抓 sha 再試一次
-    const cur2 = await getContents(path)
+    const cur2 = await getContentsRaw(path)
     res = await putContents(path, content, message, cur2?.sha)
   }
   return { ok: res.ok, conflict: false, error: `HTTP ${res.status}` }
@@ -248,8 +252,9 @@ async function flushWrites() {
 
 async function writeStateNow(path: string, ops: any[], job: WriteJob) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    const cur = await getContents(path, job.branch, job.repo) // 永遠抓最新的（已登入＝API 即時讀取）
-    let data = cur?.data != null ? cur.data : job.defaults()
+    const cur = await getContentsRaw(path, job.branch, job.repo) // 永遠抓最新的（已登入＝API 即時讀取）
+    let data = cur?.text != null ? safeParseJson(cur.text) : null
+    if (data == null) data = job.defaults()
     for (const op of ops) data = job.apply(data, op)
     const msg = `[CI Skip] ${ops.length === 1 ? ops[0]._msg ?? '更新狀態' : ops[0]._msg ?? `更新狀態（${ops.length} 個動作）`}`
     const res = await putContents(
