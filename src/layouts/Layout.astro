@@ -42,7 +42,7 @@ const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(
   <body>
     <IconSprite />
 
-    <header class="sticky top-0 z-20 bg-card border-b border-line" style="padding-top: env(safe-area-inset-top)">
+    <header class="relative z-20 bg-card border-b border-line" style="padding-top: env(safe-area-inset-top)">
       <div class="max-w-[1400px] mx-auto px-4 md:px-8 min-h-[68px] md:min-h-[80px] flex items-center justify-between gap-3 md:gap-6">
         <div class="flex items-center gap-3 md:gap-7 min-w-0">
           <a href="/" class="shrink-0 py-3">
