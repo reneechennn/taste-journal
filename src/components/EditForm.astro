@@ -406,7 +406,8 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
       location.href = '/'
     } catch (err) {
       console.error(err)
-      toast('儲存失敗，請稍後再試一次', 'warn')
+      const reason = err instanceof Error && err.message ? err.message : ''
+      toast(reason ? `儲存失敗：${reason}` : '儲存失敗，請稍後再試一次（可能是網路中斷）', 'warn')
       setSaveBtn('儲存食譜', false)
       saving = false
     }
