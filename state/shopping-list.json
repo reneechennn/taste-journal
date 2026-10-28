@@ -1,3 +1,80 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "wxchgkhmvrs19wn",
+      "name": "蛤蜊",
+      "qty": 500,
+      "unit": "g",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false,
+      "custom": false
+    },
+    {
+      "id": "ulozk5imvrs26xb",
+      "name": "白酒",
+      "qty": 50,
+      "unit": "ml",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": true,
+      "custom": false
+    },
+    {
+      "id": "i9y1crrmvrs6nky",
+      "name": "蒜頭",
+      "qty": 2,
+      "unit": "瓣",
+      "sources": [
+        "涼拌小黃瓜"
+      ],
+      "checked": true,
+      "custom": false
+    },
+    {
+      "id": "xg21w3umvrspm5s",
+      "name": "兔子",
+      "qty": 1,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": true,
+      "custom": false
+    },
+    {
+      "id": "gau5z61mvrspm5s",
+      "name": "蔥",
+      "qty": 3,
+      "unit": "隻",
+      "sources": [
+        "test"
+      ],
+      "checked": false,
+      "custom": false
+    },
+    {
+      "id": "3apgz5nmvrspm5s",
+      "name": "鹽巴",
+      "qtyText": "少許",
+      "sources": [
+        "test"
+      ],
+      "checked": false,
+      "custom": false
+    },
+    {
+      "id": "f44q8pxmvrspm5s",
+      "name": "清酒",
+      "qty": 0.5,
+      "unit": "杯",
+      "sources": [
+        "test"
+      ],
+      "checked": true,
+      "custom": false
+    }
+  ]
 }
