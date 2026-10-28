@@ -19,6 +19,26 @@
         "蒜香蛤蜊麵"
       ],
       "checked": false
+    },
+    {
+      "id": "sxt3pcamvrs26xb",
+      "name": "橄欖油",
+      "qty": 3,
+      "unit": "大匙",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false
+    },
+    {
+      "id": "ulozk5imvrs26xb",
+      "name": "白酒",
+      "qty": 50,
+      "unit": "ml",
+      "sources": [
+        "蒜香蛤蜊麵"
+      ],
+      "checked": false
     }
   ]
 }
