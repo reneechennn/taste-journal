@@ -9,7 +9,8 @@
 //   2. 需要 sharp：在專案執行 `npm i -D sharp`（若 sharp 載入失敗，補 `npm i -D @img/sharp-darwin-arm64@<同版本>`）
 //
 // 行為：
-//   - 只匯入「有內容」的頁面（有食材或步驟）；只有菜名＋連結的（多為 IG）跳過並列在報告裡
+//   - 預設只匯入「有內容」的頁面（有食材或步驟）；只有菜名＋連結的（多為 IG）跳過並列在報告裡
+//   - 加 IMPORT_STUBS=1 會把「只有菜名＋連結」的也匯入（空的食材／步驟，之後在網站上編輯）
 //   - 食材：heading_2「材料/醃料/調味料」下的表格（table_row）
 //   - 步驟：heading_2「做法/步驟」下的 numbered_list_item / 段落
 //   - 分類：Notion 的 Ingredients 標籤 → 8 大分類；Cuisine 是國旗 emoji → 菜系
@@ -195,7 +196,7 @@ for (const page of pages) {
     }
 
     const hasContent = sections.steps.length > 0 || sections.main.length > 0
-    if (!hasContent) {
+    if (!hasContent && !process.env.IMPORT_STUBS) {
       report.stubSkipped.push(`${name}（${source ?? '無連結'}）`)
       continue
     }
@@ -242,8 +243,12 @@ for (const page of pages) {
     body.push('## 步驟', ...sections.steps.map((s) => s.text), '')
 
     fs.writeFileSync(path.join(RECIPES, `${slug}.md`), yaml.join('\n') + '\n' + body.join('\n'), 'utf8')
-    report.imported.push({ name, slug, photo: !!photo, steps: sections.steps.length, ingredients: sections.main.length })
-    console.log(`✓ [${n}/${pages.length}] ${name} → ${slug}.md（步驟 ${sections.steps.length}、食材 ${sections.main.length}${photo ? '、有照片' : ''}）`)
+    report.imported.push(hasContent
+      ? { name, slug, tried: page.properties['Tried'].checkbox === true, photo: !!photo, steps: sections.steps.length, ingredients: sections.main.length }
+      : { name, slug, stub: true, tried: page.properties['Tried'].checkbox === true })
+    console.log(hasContent
+      ? `✓ [${n}/${pages.length}] ${name} → ${slug}.md（步驟 ${sections.steps.length}、食材 ${sections.main.length}${photo ? '、有照片' : ''}）`
+      : `○ [${n}/${pages.length}] ${name} → ${slug}.md（僅菜名＋來源，待在網站編輯）`)
   } catch (e) {
     report.failed.push(`${name}：${e.message}`)
     console.log(`✗ [${n}] ${name}：${e.message}`)
