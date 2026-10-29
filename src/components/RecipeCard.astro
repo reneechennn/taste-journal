@@ -2,6 +2,7 @@
 import Icon from './Icon.astro'
 import type { Recipe } from '../lib/types'
 import { sp } from '../lib/parser'
+import { CATEGORY_EMOJI } from '../lib/types'
 
 interface Props {
   recipe: Recipe
@@ -15,8 +16,8 @@ const url = (r.photoThumb && `/photos/thumbs/${encodeURIComponent(r.photoThumb)}
       url ? (
         <img src={url} alt={r.title} loading="lazy" class="w-full aspect-[4/3] object-cover" />
       ) : (
-        <div class="w-full aspect-[4/3] bg-cream flex items-center justify-center text-faint">
-          <Icon name="image" size={40} />
+        <div class="w-full aspect-[4/3] bg-cream flex items-center justify-center">
+          <span class="text-[44px] leading-none" aria-hidden="true">{CATEGORY_EMOJI[r.category] ?? '🍽️'}</span>
         </div>
       )
     }

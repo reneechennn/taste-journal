@@ -9,6 +9,18 @@ export type MealType = (typeof MEAL_TYPES)[number]
 export const CUISINES = ['日式', '台式', '韓式', '歐式', '美式', '東南亞式'] as const
 export type Cuisine = (typeof CUISINES)[number]
 
+/** 料理分類的 emoji 代表圖（無照片卡片用） */
+export const CATEGORY_EMOJI: Record<Category, string> = {
+  牛肉: '🥩',
+  雞肉: '🍗',
+  豬肉: '🍖',
+  魚類: '🐟',
+  海鮮: '🦐',
+  蛋: '🥚',
+  蔬菜: '🥬',
+  其他: '📖',
+}
+
 /** 一行食材（解析後） */
 export interface IngredientLine {
   raw: string

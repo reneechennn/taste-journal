@@ -2,6 +2,7 @@
 // 事件代理、食譜 Modal、Toast、確認視窗、卡片渲染、登入流程。
 
 import type { IngredientLine, Recipe } from './types'
+import { CATEGORY_EMOJI } from './types'
 import { REPO, captureToken, hasAuth, login, logout, flushNow, hasPendingWrites } from './github'
 import * as state from './state'
 import { sp, scaledText } from './parser'
@@ -168,7 +169,7 @@ export function recipeCardHtml(r: Recipe): string {
   const url = photoUrl(r, true) || photoUrl(r, false)
   const photo = url
     ? `<img src="${esc(url)}" alt="${esc(r.title)}" loading="lazy" class="w-full aspect-[4/3] object-cover">`
-    : `<div class="w-full aspect-[4/3] bg-cream flex items-center justify-center text-faint">${ic('image', 40)}</div>`
+    : `<div class="w-full aspect-[4/3] bg-cream flex items-center justify-center"><span class="text-[44px] leading-none" aria-hidden="true">${CATEGORY_EMOJI[r.category] ?? '🍽️'}</span></div>`
   return `
   <article class="card overflow-hidden flex flex-col">
     <div class="cursor-pointer flex flex-col flex-1" data-action="open-recipe" data-slug="${esc(r.slug)}">
