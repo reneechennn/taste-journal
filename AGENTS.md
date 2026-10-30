@@ -29,6 +29,7 @@
 - 狀態變動後派發 `CustomEvent('tj:state')`；互動統一走 ui.ts 的 `data-action` 事件代理（新增行為就擴充那個 switch）。
 - 所有 `<select class="field">` 由 `initCustomSelects()` 換成自訂下拉；原生 select 只是被隱藏的資料源（change 事件照常）。macOS 會用系統選單渲染原生彈出視窗、不吃網頁字體，別試圖用 CSS 修。**程式若直接設定 `select.value`（如編輯頁回填），必須 `dispatchEvent(new Event('change'))`，否則自訂外殼顯示不會更新**（曾漏掉導致編輯頁分類顯示空白）。
 - 輸出使用者內容一律 `esc()` 轉義 + `sp()` 做中英數自動空格。
+- **單位量詞統一在 parser.ts 一層**：`UNIT_ALIAS` 把克/g/G→公克、cc/ml→毫升、大湯匙/湯匙/tbsp→大匙、茶匙/tsp→小匙、枚→片、個→顆、小撮→撮、kg→公斤、L→公升，`parseIngredientLine` 出廠即標準化（全域顯示與採購合併都吃到）。顯示管線：`qtyText(min,max,unit)`（公斤／公升自動切換 ≥1000、可數單位 0.5 步進＋八分位「人話分數」、重量容量永遠小數）→ `scaledText()`；採購清單顯示取**範圍上限**（寧可多買）、合併時範圍上下限各自相加。步驟文字用 `normalizeUnitsInText()` 只替換「數字＋單位」型態。別在別處手寫單位比對——一律呼叫 `normalizeUnit()`。
 - 食譜來源的顯示規則（ui.ts `sourceHtml`）：純網址 → favicon＋網域；「顯示名稱 + 網址」→ 顯示自訂名稱；純文字 → 書本圖示＋原文。IG 貼文網址只含貼文 ID、無法推導帳號名，要顯示帳號名得寫成「名稱 + 網址」。
 - 沒有照片的食譜卡片顯示 emoji（不是灰色佔位圖示）：`src/lib/emoji.ts` 的 `cardEmoji()` **依主食材文字判斷**（主食材→醃料→調味料依序掃，關鍵字順序與 mapCategory 一致），判斷不出來才退回 `CATEGORY_EMOJI` 分類 emoji。正規化陷阱：`雞蛋`≠雞肉、`牛番茄`≠牛肉、雞粉／雞高湯≠雞肉，判斷前要先 replace 掉。SSR（RecipeCard.astro）與前端（ui.ts `recipeCardHtml`）兩邊都呼叫它，改判斷規則只改 emoji.ts。
 - PWA 頂部是一組調過的設定：`apple-mobile-web-app-status-bar-style=black-translucent`＋header 的 `padding-top: calc(env(safe-area-inset-top) + 8px)`＋`theme-color=#F7F3EC`。三者互相配合（狀態列一體感＋捲動時有 iOS 毛玻璃＋logo 不被模糊），不要單獨改其中一個。
