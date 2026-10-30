@@ -9,12 +9,35 @@ const UNITS = [
   '大匙', '小匙', '湯匙', '茶匙', '公克', '公斤', '毫升', '公升',
   '顆', '個', '隻', '條', '片', '根', '支', '張', '段', '塊', '朵', '粒', '瓣', '莢',
   '尾', '頭', '把', '束', '包', '盒', '罐', '袋', '瓶', '碗', '杯', '匙', '撮', '滴',
-  '盤', '鍋', '份', '克', '斤', '兩', '磅', 'g', 'ml', 'cc', 'l', 'lb', 'oz', 'cm',
+  '盤', '鍋', '份', '克', '斤', '兩', '磅', '大湯匙', '小撮', '枚',
+  'g', 'ml', 'cc', 'l', 'lb', 'oz', 'cm',
 ].sort((a, b) => b.length - a.length)
 
 const UNIT_RE = UNITS.map((u) => u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
 
-const NUM = String.raw`\d+(?:\.\d+)?(?:\s*[/／]\s*\d+)?(?:\s*[-–~～至]\s*\d+(?:\.\d+)?)?`
+// ---------- 單位統一（別名 → 標準名稱） ----------
+// 標準單位：公克／公斤、毫升／公升、大匙／小匙、撮、片、顆、少許（其餘可數單位不合併）
+const UNIT_ALIAS: Record<string, string> = {
+  克: '公克', g: '公克', G: '公克', gr: '公克',
+  kg: '公斤', KG: '公斤', 千克: '公斤',
+  cc: '毫升', ml: '毫升', mL: '毫升', ML: '毫升',
+  l: '公升', L: '公升',
+  湯匙: '大匙', 大湯匙: '大匙', tbsp: '大匙', T: '大匙',
+  茶匙: '小匙', tsp: '小匙', t: '小匙',
+  小撮: '撮',
+  枚: '片',
+  個: '顆',
+}
+
+/** 把任意的單位寫法換成標準名稱（無對應就原樣保留） */
+export function normalizeUnit(u?: string): string | undefined {
+  if (!u) return u
+  return UNIT_ALIAS[u] ?? UNIT_ALIAS[u.toLowerCase()] ?? u
+}
+
+const VAGUE_ALIAS: Record<string, string> = { 些許: '少許' }
+
+const NUM = String.raw`\d+(?:\.\d+)?(?:\s*[/／]\s*\d+)?(?:\s*[-–~～至]\s*\d+(?:\.\d+)?(?:\s*[/／]\s*\d+)?)?`
 const NUM_MAIN_RE = new RegExp(`^(.+?)\\s*(${NUM})\\s*(${UNIT_RE})?$`, 'iu')
 const NUM_LEAD_RE = new RegExp(`^(${NUM})\\s*(${UNIT_RE})?\\s+(.+)$`, 'iu')
 const CN_NUM_RE = new RegExp(`^(.+?)\\s*([一二兩三四五六七八九十半]+)\\s*(${UNIT_RE})?$`, 'u')
@@ -48,10 +71,22 @@ function evalNum(s: string): number | undefined {
     const b = parseFloat(frac[2])
     return b ? a / b : undefined
   }
-  const range = cleaned.match(/^(\d+(?:\.\d+)?)[-–~～至](\d+(?:\.\d+)?)$/)
-  if (range) return parseFloat(range[1]) // 範圍取最小值
   const n = parseFloat(cleaned)
   return Number.isFinite(n) ? n : undefined
+}
+
+/** 解析「1 - 2」「1/4 - 1/2」這種範圍，回傳 [下限, 上限]（無範圍時兩者相同） */
+function evalRange(s: string): [number, number] | undefined {
+  const cleaned = s.replace(/\s+/g, '')
+  const m = cleaned.match(/^(.+)[-–~～至](.+)$/)
+  if (m) {
+    const lo = evalNum(m[1])
+    const hi = evalNum(m[2])
+    if (lo == null || hi == null) return undefined
+    return [Math.min(lo, hi), Math.max(lo, hi)]
+  }
+  const n = evalNum(cleaned)
+  return n == null ? undefined : [n, n]
 }
 
 /** 解析單行食材 */
@@ -68,23 +103,29 @@ export function parseIngredientLine(raw: string): IngredientLine {
 
   // 模糊量詞（「鹽 少許」「香油 適量」）
   const vague = VAGUE_RE.exec(s)
-  if (vague && vague[1].trim()) return { raw, name: vague[1].trim(), qtyText: vague[2] }
-  if (VAGUE_ONLY_RE.test(s)) return { raw, name: '', qtyText: s }
+  if (vague && vague[1].trim()) return { raw, name: vague[1].trim(), qtyText: VAGUE_ALIAS[vague[2]] ?? vague[2] }
+  if (VAGUE_ONLY_RE.test(s)) return { raw, name: '', qtyText: VAGUE_ALIAS[s] ?? s }
 
   // 數字在後：「雞腿 2 隻」「低筋麵粉 100g」
   const num = NUM_MAIN_RE.exec(s)
   if (num) {
     const name = num[1].trim()
-    const qty = evalNum(num[2])
-    if (name && qty != null) return { raw, name, qty, unit: num[3] }
+    const range = evalRange(num[2])
+    if (name && range) {
+      const [lo, hi] = range
+      return { raw, name, qty: lo, qtyMax: hi !== lo ? hi : undefined, unit: normalizeUnit(num[3]) }
+    }
   }
 
   // 數字在前：「100g 低筋麵粉」
   const lead = NUM_LEAD_RE.exec(s)
   if (lead) {
     const name = lead[3].trim()
-    const qty = evalNum(lead[1])
-    if (name && qty != null) return { raw, name, qty, unit: lead[2] }
+    const range = evalRange(lead[1])
+    if (name && range) {
+      const [lo, hi] = range
+      return { raw, name, qty: lo, qtyMax: hi !== lo ? hi : undefined, unit: normalizeUnit(lead[2]) }
+    }
   }
 
   // 中文數詞：「高麗菜 一顆」「醬油 一大匙」
@@ -92,7 +133,7 @@ export function parseIngredientLine(raw: string): IngredientLine {
   if (cn) {
     const name = cn[1].trim()
     const qty = cnToNum(cn[2])
-    if (name && qty != null) return { raw, name, qty, unit: cn[3] }
+    if (name && qty != null) return { raw, name, qty, unit: normalizeUnit(cn[3]) }
   }
 
   // 解析不出來就整行當名稱
@@ -115,13 +156,13 @@ export function parseSteps(text: string): StepItem[] {
     line = line.trim()
     if (!line) continue
     if (/^[*＊💡]/.test(line)) {
-      const tip = line.replace(/^[*＊💡]\s*/, '').trim()
+      const tip = normalizeUnitsInText(line.replace(/^[*＊💡]\s*/, '').trim())
       if (!tip) continue
       if (out.length > 0) out[out.length - 1].tips.push(tip)
       else out.push({ text: tip, tips: [] })
       continue
     }
-    line = line.replace(/^\d+\s*[.、)）]\s*/, '').trim()
+    line = normalizeUnitsInText(line.replace(/^\d+\s*[.、)）]\s*/, '').trim())
     if (!line) continue
     out.push({ text: line, tips: [] })
   }
@@ -208,12 +249,66 @@ export function parseRecipe(
 
 // ---------- 顯示格式化 ----------
 
-/** 可數單位（換算時以 0.5 為步進） */
+/** 可數單位（換算時以 0.5 為步進）；大匙／小匙例外——它們要保留 1/4、1/2 這種分數 */
 const COUNTABLE = new Set([
-  '顆', '個', '隻', '條', '片', '根', '支', '張', '段', '塊', '朵', '粒', '瓣', '莢',
-  '尾', '頭', '把', '束', '包', '盒', '罐', '袋', '瓶', '碗', '杯', '匙', '大匙', '小匙',
-  '湯匙', '茶匙', '盤', '鍋', '份', '兩', '磅', 'lb', 'oz',
+  '顆', '隻', '條', '根', '片', '瓣', '朵', '塊', '把', '束', '粒', '支', '張', '段', '莢',
+  '尾', '頭', '包', '盒', '罐', '袋', '瓶', '碗', '杯', '匙', '撮',
+  '盤', '鍋', '份', '兩', '磅', 'lb', 'oz',
 ])
+
+/** 重量／容量單位：顯示用小數，不要變成「1 1/2 公斤」 */
+const MEASURE = new Set(['公克', '公斤', '毫升', '公升'])
+
+/** 大單位切換：≥1000 公克 → 公斤、≥1000 毫升 → 公升 */
+function bigUnit(q: number, unit?: string): [number, string] {
+  if (unit === '公克' && q >= 1000) return [q / 1000, '公斤']
+  if (unit === '毫升' && q >= 1000) return [q / 1000, '公升']
+  return [q, unit ?? '']
+}
+
+const FRACS: Record<number, string> = { 1: '1/8', 2: '1/4', 3: '3/8', 4: '1/2', 5: '5/8', 6: '3/4', 7: '7/8' }
+
+/** 數字格式化：
+ *  - 重量／容量（公克公斤毫升公升）→ 小數（1.5 公斤，不要變成「1 1/2 公斤」）
+ *  - 可數單位 → 0.5 步進，再以人話分數顯示（1¾ 顆 → 「1 3/4 顆」）
+ *  - 其他 → 精確八分位分數（1/4 小匙）否則小數 */
+function fmtNum(v: number, unit?: string): string {
+  const fracOf = (x: number): string | null => {
+    const e = Math.round(x * 8)
+    if (e <= 0 || Math.abs(x * 8 - e) > 1e-6 || e % 8 === 0) return null
+    const w = Math.floor(e / 8)
+    const f = FRACS[e % 8]
+    return f ? (w > 0 ? `${w} ${f}` : f) : null
+  }
+  if (unit && MEASURE.has(unit)) {
+    // 重量／容量：小數（1.5 公斤），不要變成「1 1/2 公斤」
+    v = v >= 100 ? Math.round(v) : Math.round(v * 100) / 100
+  } else {
+    // 先看原值是不是剛好是八分位分數（1/4 顆）
+    const f1 = fracOf(v)
+    if (f1) return f1
+    if (unit && COUNTABLE.has(unit)) v = Math.max(0.5, Math.round(v * 2) / 2)
+    else v = Math.round(v * 100) / 100
+    const f2 = fracOf(v)
+    if (f2) return f2
+  }
+  if (Number.isInteger(v)) return String(v)
+  return String(v).replace(/0+$/, '').replace(/\.$/, '')
+}
+
+/** 「1 – 2 根」「1/4 – 1/2 小匙」「1.5 公斤」：食材份量顯示的單一管道 */
+export function qtyText(min: number, max: number | undefined, unit?: string): string {
+  const u = unit ?? ''
+  if (max != null && max !== min) {
+    // 範圍兩端一律用同一個單位：任一端到大單位就整組換算（600–1200 ml → 0.6–1.2 公升）
+    const big = (u === '公克' || u === '毫升') && max >= 1000
+    const conv = big ? 1000 : 1
+    const label = big ? (u === '公克' ? '公斤' : '公升') : u
+    return `${fmtNum(min / conv, label)} – ${fmtNum(max / conv, label)}${label ? ' ' + label : ''}`
+  }
+  const [q, label] = bigUnit(min, u)
+  return (fmtNum(q, label) + (label ? ' ' + label : '')).trim()
+}
 
 export function formatQty(q: number, unit?: string): string {
   let v = q
@@ -223,12 +318,36 @@ export function formatQty(q: number, unit?: string): string {
   return String(v).replace(/0+$/, '').replace(/\.$/, '')
 }
 
-/** 依人份換算後的顯示文字（「2 隻」「少許」） */
+/** 依人份換算後的顯示文字（「2 隻」「1 – 2 根」「少許」） */
 export function scaledText(line: IngredientLine, baseServings: number, servings: number): string {
   if (line.qty == null) return line.qtyText ?? ''
-  const q = line.qty * (servings / (baseServings || 4))
-  const unit = line.unit ?? ''
-  return (formatQty(q, unit) + (unit ? ' ' + unit : '')).trim()
+  const f = servings / (baseServings || 4)
+  return qtyText(line.qty * f, line.qtyMax != null ? line.qtyMax * f : undefined, line.unit ?? '').trim()
+}
+
+// ---------- 步驟文字裡的單位統一（只動「數字＋單位」型態，安全替換） ----------
+const CN_NUM_CHARS = '一二兩三四五六七八九十半'
+
+export function normalizeUnitsInText(t: string): string {
+  if (!t) return t
+  return (
+    t
+      // 數字（含分數）後的拉丁單位：100 cc → 100 毫升（阿拉伯數字補空格）
+      .replace(
+        /(\d+(?:\.\d+)?(?:\s*[/／]\s*\d+)?)(\s*)(cc|ml|mL|ML|gr|g|G|l|L)(?![A-Za-z0-9])/g,
+        (m, n, s2, u) => n + ' ' + normalizeUnit(u),
+      )
+      // 數字／中文數詞後的中文別名單位：1/2 枚 → 1/2 片、2 大湯匙 → 2 大匙
+      .replace(
+        new RegExp(`([0-9]+(?:\\.[0-9]+)?(?:\\s*[/／]\\s*[0-9]+)?|[${CN_NUM_CHARS}]+)\\s*(大湯匙|茶匙|小撮|枚|克|湯匙)`, 'g'),
+        (m, n, u) => {
+          const map: Record<string, string> = { 大湯匙: '大匙', 茶匙: '小匙', 小撮: '撮', 枚: '片', 克: '公克', 湯匙: '大匙' }
+          const isArabic = /^[0-9]/.test(n)
+          return n + (isArabic ? ' ' : '') + map[u]
+        },
+      )
+      .replace(/一小撮/g, '一撮')
+  )
 }
 
 /** 中英數字自動空格（盤古之白） */

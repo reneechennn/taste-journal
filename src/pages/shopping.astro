@@ -41,13 +41,13 @@ import Icon from '../components/Icon.astro'
 <script>
   import * as state from '../lib/state'
   import { ic, esc, sp, toast, requireAuth, confirmDialog, onReady } from '../lib/ui'
-  import { formatQty } from '../lib/parser'
+  import { qtyText, normalizeUnit } from '../lib/parser'
   import type { ShoppingItem } from '../lib/types'
 
-  function qtyText(item: ShoppingItem): string {
+  function qtyLine(item: ShoppingItem): string {
     if (item.qty != null) {
-      const unit = item.unit ?? ''
-      return (formatQty(item.qty, item.unit) + (unit ? ' ' + unit : '')).trim()
+      // 採購清單顯示範圍的上限（寧可多買，「1 – 2 根」→「2 根」），並統一單位＋公斤／公升
+      return qtyText(item.qtyMax ?? item.qty, undefined, normalizeUnit(item.unit ?? ''))
     }
     return item.qtyText ?? ''
   }
@@ -90,7 +90,7 @@ import Icon from '../components/Icon.astro'
         <div class="flex-1 min-w-0">
           <p class="text-[16px] md:text-[17px] font-medium leading-snug ${item.checked ? 'line-through text-faint' : ''}">
             ${esc(sp(item.name))}
-            ${qtyText(item) ? `<span class="text-soft font-normal text-[14px] ml-1">${esc(sp(qtyText(item)))}</span>` : ''}
+            ${qtyLine(item) ? `<span class="text-soft font-normal text-[14px] ml-1">${esc(sp(qtyLine(item)))}</span>` : ''}
           </p>
           ${
             item.sources.length > 0

@@ -131,7 +131,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
 
 <script>
   import type { Recipe } from '../lib/types'
-  import { parseIngredientLines, parseSteps, sp } from '../lib/parser'
+  import { parseIngredientLines, parseSteps, sp, qtyText } from '../lib/parser'
   import { REPO, hasAuth, login, writeTextFile, uploadImage, deleteFile } from '../lib/github'
   import { toast, confirmDialog, ic, esc, requireAuth, onReady } from '../lib/ui'
   import * as state from '../lib/state'
@@ -259,7 +259,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
         : lines
             .map((l) => {
               const qty =
-                l.qty != null ? `× ${l.qty}${l.unit ? ' ' + l.unit : ''}` : (l.qtyText ?? '')
+                l.qty != null ? `× ${qtyText(l.qty, l.qtyMax, l.unit)}` : (l.qtyText ?? '')
               return `<span class="text-[13px] px-2.5 py-1 rounded-full bg-cream text-soft">${esc(sp(l.name))}${qty ? ` <b class="text-accent-deep font-normal">${esc(sp(qty))}</b>` : ''}</span>`
             })
             .join('')

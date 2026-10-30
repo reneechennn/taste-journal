@@ -26,6 +26,8 @@ export interface IngredientLine {
   raw: string
   name: string
   qty?: number
+  /** 範圍的上限（「1 – 2 根」的 2；無範圍時不存在） */
+  qtyMax?: number
   unit?: string
   /** 「少許」「適量」等模糊描述 */
   qtyText?: string
@@ -73,6 +75,8 @@ export interface ShoppingItem {
   id: string
   name: string
   qty?: number
+  /** 加總後範圍的上限（顯示取上限，寧可多買） */
+  qtyMax?: number
   unit?: string
   qtyText?: string
   sources: string[]

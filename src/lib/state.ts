@@ -6,7 +6,7 @@
 // 由 GitHub 端把動作套在最新資料上——多分頁／多裝置不會互相覆蓋。
 
 import type { CookCounts, IngredientLine, MenuFile, ShoppingFile, ShoppingItem } from './types'
-import { parseIngredientLine } from './parser'
+import { parseIngredientLine, normalizeUnit } from './parser'
 import { readJSON, writeJSON, STATE_BRANCH, DATA_REPO } from './github'
 
 let menu: MenuFile = { date: '', recipes: [] }
@@ -132,17 +132,23 @@ function scheduleCookWrite(op: any) {
   writeJSON('state/cook-count.json', op, { apply: cookApply, defaults: cookDefaults, branch: STATE_BRANCH, repo: DATA_REPO })
 }
 
-/** 把一行食材併入清單（同名同單位加總、模糊描述合併來源；已勾選的項目不合併） */
+/** 把一行食材併入清單（同名同單位加總、模糊描述合併來源；已勾選的項目不合併）
+ *  單位一律先換成標準名稱再比對（「200 克」跟「200 g」會加總）；範圍的上下限各自相加 */
 function mergeShoppingLine(items: ShoppingItem[], line: IngredientLine, source?: string): void {
   if (!line.name) return
   const existing = items.find((it) => {
     if (!it.name || it.name !== line.name || it.checked) return false
-    if (line.qty != null && it.qty != null) return it.unit === line.unit
+    if (line.qty != null && it.qty != null) return normalizeUnit(it.unit) === normalizeUnit(line.unit)
     if (line.qty == null && it.qty == null) return (it.qtyText ?? '') === (line.qtyText ?? '')
     return false
   })
   if (existing) {
-    if (line.qty != null && existing.qty != null) existing.qty = existing.qty + line.qty
+    if (line.qty != null && existing.qty != null) {
+      // 範圍：上下限各自相加（下限 qty、上限 qtyMax）
+      const beforeMax = existing.qtyMax ?? existing.qty
+      existing.qty = existing.qty + line.qty
+      if (line.qtyMax != null || beforeMax !== existing.qty) existing.qtyMax = beforeMax + (line.qtyMax ?? line.qty ?? 0)
+    }
     if (source && !existing.sources.includes(source)) existing.sources.push(source)
   } else {
     const id = (line as any)._id
@@ -150,7 +156,8 @@ function mergeShoppingLine(items: ShoppingItem[], line: IngredientLine, source?:
       id: typeof id === 'string' && id ? id : uid(),
       name: line.name,
       qty: line.qty,
-      unit: line.unit,
+      qtyMax: line.qtyMax,
+      unit: normalizeUnit(line.unit),
       qtyText: line.qtyText,
       sources: source ? [source] : [],
       checked: false,
