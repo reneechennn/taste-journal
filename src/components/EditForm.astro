@@ -151,10 +151,11 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
     if (ref.startsWith(location.origin) && !ref.includes('/edit')) return ref
     return '/'
   }
-  // 標記：讓搜尋頁在返回後還原篩選與捲動位置
+  // 標記：讓搜尋頁在返回後還原篩選與捲動位置（一律都設，只有搜尋頁會讀取；
+  // 注意線上 Cloudflare 會把 /search 導向 /search/，不能只比對單一路徑字串）
   function markReturning() {
     try {
-      if (new URL(returnTarget()).pathname === '/search') sessionStorage.setItem('tj_search_restore', '1')
+      sessionStorage.setItem('tj_search_restore', '1')
     } catch {}
   }
 
