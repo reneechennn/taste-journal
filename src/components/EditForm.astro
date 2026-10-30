@@ -10,7 +10,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
       <button id="btn-delete-m" class="quick-btn !w-10 !h-10 !text-warn hidden" title="刪除食譜" aria-label="刪除食譜">
         <Icon name="trash" size={16} />
       </button>
-      <a href="/" class="quick-btn !w-10 !h-10" title="取消" aria-label="取消">
+      <a href="/" data-back class="quick-btn !w-10 !h-10" title="取消" aria-label="取消">
         <Icon name="x" size={17} />
       </a>
       <button id="btn-save-m" class="quick-btn !w-10 !h-10 is-on" title="儲存食譜" aria-label="儲存食譜">
@@ -121,7 +121,7 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
         <Icon name="trash" size={15} /> 刪除
       </button>
       <div class="flex-1"></div>
-      <a href="/" class="btn-ghost !py-2 shrink-0 hidden sm:inline-flex">取消</a>
+      <a href="/" data-back class="btn-ghost !py-2 shrink-0 hidden sm:inline-flex">取消</a>
       <button id="btn-save" class="btn-accent shrink-0">
         <Icon name="save" size={16} /> 儲存食譜
       </button>
@@ -144,6 +144,19 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
   let editing: Recipe | null = null
   let photoFile: File | null = null
   let saving = false
+
+  // 離開後要回去的頁面：從哪頁進編輯就回哪頁（document.referrer 不含 hash，正好可以甩掉食譜 modal）
+  function returnTarget(): string {
+    const ref = document.referrer
+    if (ref.startsWith(location.origin) && !ref.includes('/edit')) return ref
+    return '/'
+  }
+  // 標記：讓搜尋頁在返回後還原篩選與捲動位置
+  function markReturning() {
+    try {
+      if (new URL(returnTarget()).pathname === '/search') sessionStorage.setItem('tj_search_restore', '1')
+    } catch {}
+  }
 
   // ---------- 啟動 ----------
   async function boot() {
@@ -174,6 +187,9 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
     } else if (!hasAuth()) {
       $('auth-banner').classList.remove('hidden')
     }
+
+    // 「取消」也回到來源頁
+    for (const a of document.querySelectorAll<HTMLAnchorElement>('a[data-back]')) a.href = returnTarget()
 
     bind()
     renderPreviews()
@@ -407,7 +423,8 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
       if (!res.ok) throw new Error(res.error ?? 'GitHub 寫入失敗')
 
       toast('已儲存！網站更新中，大約 1-2 分鐘後生效', 'ok', true)
-      location.href = '/'
+      markReturning()
+      location.href = returnTarget()
     } catch (err) {
       console.error(err)
       const reason = err instanceof Error && err.message ? err.message : ''
@@ -433,7 +450,8 @@ import { CATEGORIES, CUISINES, MEAL_TYPES } from '../lib/types'
       if (!done) throw new Error('刪除失敗')
       if (state.inToday(editing.slug)) state.removeToday(editing.slug)
       toast('已刪除，網站更新中（約 1-2 分鐘）', 'ok', true)
-      location.href = '/'
+      markReturning()
+      location.href = returnTarget()
     } catch {
       toast('刪除失敗，請稍後再試', 'warn')
     }

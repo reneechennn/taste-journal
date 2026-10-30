@@ -172,6 +172,9 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
     document.getElementById('result-count')!.textContent = String(list.length)
 
+    // 記住篩選狀態（存檔後從編輯頁回來時還原）
+    sessionStorage.setItem('tj_search_state', JSON.stringify(filters))
+
     document.getElementById('recipe-grid')!.innerHTML =
       list.length > 0
         ? list.map(recipeCardHtml).join('')
@@ -201,6 +204,51 @@ const CATEGORY_EMOJI: Record<string, string> = {
   }
 
   onReady(() => {
+    // 從編輯頁回來 → 還原上次的篩選與捲動位置
+    if (sessionStorage.getItem('tj_search_restore') === '1') {
+      sessionStorage.removeItem('tj_search_restore')
+      try {
+        const saved = JSON.parse(sessionStorage.getItem('tj_search_state') || 'null')
+        if (saved) {
+          const input = document.getElementById('search-input') as HTMLInputElement | null
+          if (input && saved.q) {
+            input.value = saved.q
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+          }
+          const select = document.getElementById('cuisine-select') as HTMLSelectElement | null
+          if (select && saved.cuisine && saved.cuisine !== '全部') {
+            select.value = saved.cuisine
+            select.dispatchEvent(new Event('change', { bubbles: true }))
+          }
+          document.querySelectorAll<HTMLButtonElement>('#type-pills [data-type]').forEach((b) =>
+            b.classList.toggle('is-on', b.dataset.type === saved.type),
+          )
+          document.querySelectorAll<HTMLButtonElement>('#cat-grid [data-category]').forEach((b) =>
+            b.classList.toggle('is-on', b.dataset.category === saved.category),
+          )
+          filters.q = saved.q ?? ''
+          filters.type = saved.type ?? '全部'
+          filters.cuisine = saved.cuisine ?? '全部'
+          filters.category = saved.category ?? ''
+        }
+      } catch {}
+      const y = Number(sessionStorage.getItem('tj_search_scroll') ?? '-1')
+      if (y > 0) requestAnimationFrame(() => window.scrollTo(0, y))
+    }
+    // 捲動位置持續記錄（rAF 節流），供返回後還原
+    let scrollQueued = false
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (scrollQueued) return
+        scrollQueued = true
+        requestAnimationFrame(() => {
+          scrollQueued = false
+          sessionStorage.setItem('tj_search_scroll', String(window.scrollY))
+        })
+      },
+      { passive: true },
+    )
     let debounce: ReturnType<typeof setTimeout> | null = null
     document.getElementById('search-input')?.addEventListener('input', (e) => {
       filters.q = (e.target as HTMLInputElement).value

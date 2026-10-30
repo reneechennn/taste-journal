@@ -33,6 +33,7 @@
 - 沒有照片的食譜卡片顯示 emoji（不是灰色佔位圖示）：`src/lib/emoji.ts` 的 `cardEmoji()` **依主食材文字判斷**（主食材→醃料→調味料依序掃，關鍵字順序與 mapCategory 一致），判斷不出來才退回 `CATEGORY_EMOJI` 分類 emoji。正規化陷阱：`雞蛋`≠雞肉、`牛番茄`≠牛肉、雞粉／雞高湯≠雞肉，判斷前要先 replace 掉。SSR（RecipeCard.astro）與前端（ui.ts `recipeCardHtml`）兩邊都呼叫它，改判斷規則只改 emoji.ts。
 - PWA 頂部是一組調過的設定：`apple-mobile-web-app-status-bar-style=black-translucent`＋header 的 `padding-top: calc(env(safe-area-inset-top) + 8px)`＋`theme-color=#F7F3EC`。三者互相配合（狀態列一體感＋捲動時有 iOS 毛玻璃＋logo 不被模糊），不要單獨改其中一個。
 - 編輯頁是 `/edit?s=<slug>`（單一靜態頁 + query），**刻意不用** `/edit/[slug]`（中文路徑 percent-encoding 在某些靜態伺服器會 404），不要改回去。
+- 編輯頁存檔／刪除／取消後**回到來源頁**（`returnTarget()` 用 `document.referrer`，天然不含 hash 所以能甩掉食譜 modal）；回到 `/search` 前會先設 `sessionStorage['tj_search_restore']`，search.astro 用它還原篩選（`tj_search_state`）與捲動位置（`tj_search_scroll`），用過即清。
 - 食譜 Modal 用 URL hash `#r=<slug>` 開關（上一頁可關）。
 - 照片：`public/photos/`（大圖）+ `public/photos/thumbs/`（卡片用，選填）；編輯器上傳時 canvas 壓縮出兩張。手動加照片要記得補縮圖。
 - 樣式用 `src/styles/global.css` 的 `@theme` token（paper/cream/card/ink/soft/faint/line/accent/leaf）與既有元件 class（`.card` `.btn-accent` `.btn-ghost` `.chip` `.pill` `.field` `.quick-btn` `.tip-box`）；Tailwind v4 經 `@tailwindcss/vite`。
