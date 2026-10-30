@@ -272,25 +272,26 @@ const FRACS: Record<number, string> = { 1: '1/8', 2: '1/4', 3: '3/8', 4: '1/2', 
  *  - 重量／容量（公克公斤毫升公升）→ 小數（1.5 公斤，不要變成「1 1/2 公斤」）
  *  - 可數單位 → 0.5 步進，再以人話分數顯示（1¾ 顆 → 「1 3/4 顆」）
  *  - 其他 → 精確八分位分數（1/4 小匙）否則小數 */
+/** 數字格式化：
+ *  - 重量／容量（公克公斤毫升公升）→ 永遠小數（1.5 公斤）
+ *  - 其餘：小於 1 → 人話分數（1/2、1/4 顆）；大於等於 1 → 小數（1.5、1.75，最多三位不四捨五入成 1.13） */
 function fmtNum(v: number, unit?: string): string {
-  const fracOf = (x: number): string | null => {
-    const e = Math.round(x * 8)
-    if (e <= 0 || Math.abs(x * 8 - e) > 1e-6 || e % 8 === 0) return null
-    const w = Math.floor(e / 8)
-    const f = FRACS[e % 8]
-    return f ? (w > 0 ? `${w} ${f}` : f) : null
-  }
   if (unit && MEASURE.has(unit)) {
-    // 重量／容量：小數（1.5 公斤），不要變成「1 1/2 公斤」
     v = v >= 100 ? Math.round(v) : Math.round(v * 100) / 100
   } else {
-    // 先看原值是不是剛好是八分位分數（1/4 顆）
-    const f1 = fracOf(v)
-    if (f1) return f1
+    const fracOf = (x: number): string | null => {
+      const e = Math.round(x * 8)
+      if (e <= 0 || Math.abs(x * 8 - e) > 1e-6 || e % 8 === 0) return null
+      return FRACS[e % 8] ?? null
+    }
+    // 小於 1 才走分數（1/4 顆）；大於等於 1 一律小數
+    let f = v < 1 ? fracOf(v) : null
+    if (f) return f
     if (unit && COUNTABLE.has(unit)) v = Math.max(0.5, Math.round(v * 2) / 2)
-    else v = Math.round(v * 100) / 100
-    const f2 = fracOf(v)
-    if (f2) return f2
+    else v = Math.round(v * 1000) / 1000
+    // 取整後仍小於 1 → 分數；否則小數
+    f = v < 1 ? fracOf(v) : null
+    if (f) return f
   }
   if (Number.isInteger(v)) return String(v)
   return String(v).replace(/0+$/, '').replace(/\.$/, '')
