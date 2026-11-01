@@ -268,23 +268,29 @@ function bigUnit(q: number, unit?: string): [number, string] {
 
 const FRACS: Record<number, string> = { 1: '1/8', 2: '1/4', 3: '3/8', 4: '1/2', 5: '5/8', 6: '3/4', 7: '7/8' }
 
-/** 數字格式化：
- *  - 重量／容量（公克公斤毫升公升）→ 小數（1.5 公斤，不要變成「1 1/2 公斤」）
- *  - 可數單位 → 0.5 步進，再以人話分數顯示（1¾ 顆 → 「1 3/4 顆」）
- *  - 其他 → 精確八分位分數（1/4 小匙）否則小數 */
+/** 人話分數（僅小於 1 的值）：八分位（1/4、1/2、3/4⋯）＋ 三分位（1/3、2/3） */
+function fracOf(x: number): string | null {
+  if (x <= 0 || x >= 1) return null
+  const e = Math.round(x * 8)
+  if (Math.abs(x * 8 - e) < 1e-6 && e % 8 !== 0) {
+    const b = FRACS[e % 8]
+    if (b) return b
+  }
+  const n3 = Math.round(x * 3)
+  if (n3 === 1 || n3 === 2) {
+    if (Math.abs(x * 3 - n3) < 1e-6) return n3 === 1 ? '1/3' : '2/3'
+  }
+  return null
+}
+
 /** 數字格式化：
  *  - 重量／容量（公克公斤毫升公升）→ 永遠小數（1.5 公斤）
- *  - 其餘：小於 1 → 人話分數（1/2、1/4 顆）；大於等於 1 → 小數（1.5、1.75，最多三位不四捨五入成 1.13） */
+ *  - 其餘：小於 1 → 人話分數（1/2、1/4、2/3 顆）；大於等於 1 → 小數（1.5、1.75，最多三位不四捨五入成 1.13） */
 function fmtNum(v: number, unit?: string): string {
   if (unit && MEASURE.has(unit)) {
     v = v >= 100 ? Math.round(v) : Math.round(v * 100) / 100
   } else {
-    const fracOf = (x: number): string | null => {
-      const e = Math.round(x * 8)
-      if (e <= 0 || Math.abs(x * 8 - e) > 1e-6 || e % 8 === 0) return null
-      return FRACS[e % 8] ?? null
-    }
-    // 小於 1 才走分數（1/4 顆）；大於等於 1 一律小數
+    // 小於 1 才走分數（1/4 顆、2/3 小匙）；大於等於 1 一律小數
     let f = v < 1 ? fracOf(v) : null
     if (f) return f
     if (unit && COUNTABLE.has(unit)) v = Math.max(0.5, Math.round(v * 2) / 2)
