@@ -15,10 +15,12 @@ const RULES: Array<[RegExp, string]> = [
 
 /**
  * 無照片卡片要顯示的 emoji：
- * 依序看主食材 → 醃料 → 調味料的文字，有對應關鍵字就顯示該類 emoji；
- * 都判斷不出來才退回分類的 emoji（CATEGORY_EMOJI）。
+ * 使用者選了明確分類（≠其他）→ 直接用分類 emoji（分類就是主食材的宣告，別被食材文字蓋掉）；
+ * 分類是「其他」（多為尚未整理的匯入食譜）→ 依序掃主食材 → 醃料 → 調味料的文字，
+ * 有對應關鍵字就顯示該類 emoji；都判斷不出來才退回分類的 emoji（CATEGORY_EMOJI）。
  */
 export function cardEmoji(r: Pick<Recipe, 'category' | 'ingredients' | 'marinades' | 'seasonings'>): string {
+  if (r.category !== '其他') return CATEGORY_EMOJI[r.category] ?? '🍽️'
   for (const lines of [r.ingredients, r.marinades, r.seasonings]) {
     if (!lines?.length) continue
     // 先排除誤判組合：雞蛋≠雞、牛番茄≠牛、雞粉／雞高湯≠雞肉
