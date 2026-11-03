@@ -222,8 +222,8 @@ function ingredientSectionsHtml(r: Recipe): string {
             (l, i) => `
         <label class="flex items-center gap-3 py-2">
           <span class="ing-round"><input type="checkbox" class="ing-check" data-section="${g.key}" data-idx="${i}"><span class="ball">${ic('check', 13)}</span></span>
-          <span class="flex-1 text-[15px] md:text-[16px] leading-relaxed">${esc(sp(l.name))}</span>
-          <span class="text-soft whitespace-nowrap text-[14px]" data-qty>${esc(sp(scaledText(l, r.servings, currentServings)))}</span>
+          <span class="flex-1 text-[16px] md:text-[17px] leading-relaxed">${esc(sp(l.name))}</span>
+          <span class="text-soft whitespace-nowrap text-[15px]" data-qty>${esc(sp(scaledText(l, r.servings, currentServings)))}</span>
         </label>`,
           )
           .join('')}
@@ -243,10 +243,10 @@ function stepsHtml(r: Recipe): string {
         .map(
           (s, i) => `
       <li class="flex gap-3">
-        <span class="w-7 h-7 rounded-full bg-cream text-accent-deep font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+        <span class="w-8 h-8 rounded-full bg-cream text-accent-deep font-bold text-[15px] flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
         <div class="flex-1 min-w-0">
-          <p class="text-[15px] md:text-[16px] leading-[1.9]">${esc(sp(s.text))}</p>
-          ${s.tips.map((t) => `<div class="tip-box mt-2 ml-0"><span class="shrink-0 text-[14px] leading-[1.7]">💡</span><span>${esc(sp(t))}</span></div>`).join('')}
+          <p class="text-[16.5px] md:text-[17.5px] leading-[1.9]">${esc(sp(s.text))}</p>
+          ${s.tips.map((t) => `<div class="tip-box mt-2 ml-0"><span class="shrink-0 text-[15px] leading-[1.7]">💡</span><span>${esc(sp(t))}</span></div>`).join('')}
         </div>
       </li>`,
         )
