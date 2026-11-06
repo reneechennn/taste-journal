@@ -1,5 +1,5 @@
 // 無照片食譜卡片的 emoji 判斷
-import type { Recipe } from './types'
+import type { MealType, Recipe } from './types'
 import { CATEGORY_EMOJI } from './types'
 
 /** 主食材關鍵字 → emoji（先到先得；順序跟 mapCategory 的分類判斷一致） */
@@ -14,16 +14,32 @@ const RULES: Array<[RegExp, string]> = [
 ]
 
 /**
- * 無照片卡片要顯示的 emoji：
- * 使用者選了明確分類（≠其他）→ 直接用分類 emoji（分類就是主食材的宣告，別被食材文字蓋掉）；
- * 分類是「其他」（多為尚未整理的匯入食譜）→ 依序掃主食材 → 醃料 → 調味料的文字，
- * 有對應關鍵字就顯示該類 emoji；都判斷不出來才退回分類的 emoji（CATEGORY_EMOJI）。
+ * 分類「其他」時的餐點類型 emoji（無法從主食材定型的料理：蔥鹽醬會被『蔥』誤判成蔬菜）
+ * 沒列入的類型（主菜等）仍靠主食材文字推斷
  */
-export function cardEmoji(r: Pick<Recipe, 'category' | 'ingredients' | 'marinades' | 'seasonings'>): string {
+const TYPE_EMOJI: Record<string, string> = {
+  早午餐: '🍳',
+  副菜: '🥗',
+  湯品: '🍲',
+  飯類: '🍚',
+  麵食: '🍜',
+  點心: '🍪',
+  醬料: '🥫',
+}
+
+/**
+ * 無照片卡片要顯示的 emoji（有照片時不會呼叫到這支，那些直接走圖片）：
+ * 1. 使用者選了明確分類（≠其他）→ 直接用分類 emoji（分類就是主食材的宣告，別被食材文字蓋掉）
+ * 2. 分類是「其他」＋餐點類型有專屬 emoji → 用類型 emoji
+ * 3. 主菜等未列入的類型 → 依序掃主食材 → 醃料 → 調味料的文字（先排除雞蛋≠雞、牛番茄≠牛等誤判）
+ * 4. 都判斷不出來 → 📖
+ */
+export function cardEmoji(r: Pick<Recipe, 'category' | 'type' | 'ingredients' | 'marinades' | 'seasonings'>): string {
   if (r.category !== '其他') return CATEGORY_EMOJI[r.category] ?? '🍽️'
+  const byType = TYPE_EMOJI[r.type as MealType]
+  if (byType) return byType
   for (const lines of [r.ingredients, r.marinades, r.seasonings]) {
     if (!lines?.length) continue
-    // 先排除誤判組合：雞蛋≠雞、牛番茄≠牛、雞粉／雞高湯≠雞肉
     const text = lines
       .map((l) => `${l.raw} ${l.name ?? ''}`)
       .join(' ')
@@ -32,5 +48,5 @@ export function cardEmoji(r: Pick<Recipe, 'category' | 'ingredients' | 'marinade
       .replace(/雞(高)?湯(塊|粉)?|雞精(粉)?|雞晶|雞粉/g, '高湯')
     for (const [re, emoji] of RULES) if (re.test(text)) return emoji
   }
-  return CATEGORY_EMOJI[r.category] ?? '🍽️'
+  return '📖'
 }
