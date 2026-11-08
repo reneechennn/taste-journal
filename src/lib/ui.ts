@@ -189,16 +189,16 @@ export function recipeCardHtml(r: Recipe): string {
 export function todayCardHtml(r: Recipe): string {
   const url = photoUrl(r, true) || photoUrl(r, false)
   const photo = url
-    ? `<img src="${esc(url)}" alt="" class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl object-cover shrink-0">`
+    ? `<img src="${esc(url)}" alt="" class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl object-cover shrink-0 pointer-events-none">`
     : `<div class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-cream flex items-center justify-center text-faint shrink-0">${ic('image', 22)}</div>`
   return `
-  <div class="card flex items-center gap-2 sm:gap-3 p-2 sm:p-3">
+  <div class="card flex items-center gap-2 sm:gap-3 p-2 sm:p-3 cursor-pointer" data-action="open-recipe" data-slug="${esc(r.slug)}">
     ${photo}
-    <div class="flex-1 min-w-0 cursor-pointer" data-action="open-recipe" data-slug="${esc(r.slug)}">
+    <div class="flex-1 min-w-0">
       <p class="truncate font-medium text-[15px]">${esc(sp(r.title))}</p>
       <p class="text-xs text-faint mt-0.5">${r.time ? `約 ${esc(String(r.time))} 分鐘` : esc(r.cuisine)}</p>
     </div>
-    <button class="quick-btn" data-action="toggle-today" data-slug="${esc(r.slug)}" title="移出今日餐點" aria-label="移出今日餐點">${ic('x', 15)}</button>
+    <button class="quick-btn pointer-events-auto" data-action="toggle-today" data-slug="${esc(r.slug)}" title="移出今日餐點" aria-label="移出今日餐點">${ic('x', 15)}</button>
   </div>`
 }
 
