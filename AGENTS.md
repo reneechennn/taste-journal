@@ -31,7 +31,7 @@
 - 輸出使用者內容一律 `esc()` 轉義 + `sp()` 做中英數自動空格。
 - **單位量詞統一在 parser.ts 一層**：`UNIT_ALIAS` 把克/g/G→公克、cc/ml→毫升、大湯匙/湯匙/tbsp→大匙、茶匙/tsp→小匙、枚→片、個→顆、小撮→撮、kg→公斤、L→公升，`parseIngredientLine` 出廠即標準化（全域顯示與採購合併都吃到）。顯示管線：`qtyText(min,max,unit)`（公斤／公升自動切換 ≥1000；**小於 1 → 八分位＋三分位人話分數（1/2、1/4、2/3 顆），大於等於 1 → 小數最多三位**（1.5、1.75，不要出現「1 1/2」混合分數）；重量容量永遠小數；可數單位 0.5 步進）→ `scaledText()`；採購清單顯示取**範圍上限**（寧可多買）、合併時範圍上下限各自相加。步驟文字用 `normalizeUnitsInText()` 只替換「數字＋單位」型態。別在別處手寫單位比對——一律呼叫 `normalizeUnit()`。
 - 食譜來源的顯示規則（ui.ts `sourceHtml`）：純網址 → favicon＋網域；「顯示名稱 + 網址」→ 顯示自訂名稱；純文字 → 書本圖示＋原文。IG 貼文網址只含貼文 ID、無法推導帳號名，要顯示帳號名得寫成「名稱 + 網址」。
-- 沒有照片的食譜卡片顯示 emoji（不是灰色佔位圖示）：`src/lib/emoji.ts` 的 `cardEmoji()`。**2026-11-06 定案規則：① 有照片 → 圖片；② 分類明確（≠「其他」）→ 分類 emoji；③ 分類「其他」→ 優先依餐點類型（早午餐🍳 副菜🥗 湯品🍲 飯類🍚 麵食🍜 點心🍪 醬料🥫）；④ 主菜等未列的類型 → 掃主食材文字（先排除雞蛋≠雞、牛番茄≠牛等誤判），最後 📖。**改規則只改 emoji.ts。
+- 沒有照片的食譜卡片顯示 emoji（不是灰色佔位圖示）：`src/lib/emoji.ts` 的 `cardEmoji()`。**2026-11-09 定案順位：① 有照片 → 圖片；② 餐點類型列入清單（早午餐🍳 副菜🥗 湯品🍲 飯類🍚 麵食🍜 點心🍪 醬料🥫）→ 類型 emoji（優先於分類！）；③ 主菜等未列入 → 以「主食材分類」emoji（分類明確用分類；分類其他則掃主食材文字推斷，先排除雞蛋≠雞、牛番茄≠牛等誤判）；④ 判斷不出 → 📖。**改規則只改 emoji.ts。
 - PWA 頂部是一組調過的設定：`apple-mobile-web-app-status-bar-style=black-translucent`＋header 的 `padding-top: calc(env(safe-area-inset-top) + 8px)`＋`theme-color=#F7F3EC`。三者互相配合（狀態列一體感＋捲動時有 iOS 毛玻璃＋logo 不被模糊），不要單獨改其中一個。
 - 編輯頁是 `/edit?s=<slug>`（單一靜態頁 + query），**刻意不用** `/edit/[slug]`（中文路徑 percent-encoding 在某些靜態伺服器會 404），不要改回去。
 - 編輯頁存檔／刪除／取消後**回到來源頁**（`returnTarget()` 用 `document.referrer`，天然不含 hash 所以能甩掉食譜 modal）；回到 `/search` 前會先設 `sessionStorage['tj_search_restore']`，search.astro 用它還原篩選（`tj_search_state`）與捲動位置（`tj_search_scroll`），用過即清。
