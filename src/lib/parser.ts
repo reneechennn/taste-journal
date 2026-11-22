@@ -303,7 +303,7 @@ function fmtNum(v: number, unit?: string): string {
   return String(v).replace(/0+$/, '').replace(/\.$/, '')
 }
 
-/** 「1 – 2 根」「1/4 – 1/2 小匙」「1.5 公斤」：食材份量顯示的單一管道 */
+/** 「1 - 2 根」「1/4 - 1/2 小匙」「1.5 公斤」：食材份量顯示的單一管道 */
 export function qtyText(min: number, max: number | undefined, unit?: string): string {
   const u = unit ?? ''
   if (max != null && max !== min) {
@@ -311,7 +311,7 @@ export function qtyText(min: number, max: number | undefined, unit?: string): st
     const big = (u === '公克' || u === '毫升') && max >= 1000
     const conv = big ? 1000 : 1
     const label = big ? (u === '公克' ? '公斤' : '公升') : u
-    return `${fmtNum(min / conv, label)} – ${fmtNum(max / conv, label)}${label ? ' ' + label : ''}`
+    return `${fmtNum(min / conv, label)} - ${fmtNum(max / conv, label)}${label ? ' ' + label : ''}`
   }
   const [q, label] = bigUnit(min, u)
   return (fmtNum(q, label) + (label ? ' ' + label : '')).trim()
@@ -357,11 +357,12 @@ export function normalizeUnitsInText(t: string): string {
   )
 }
 
-/** 中英數字自動空格（盤古之白） */
+/** 中英數字自動空格（盤古之白）＋ 數字範圍符號前後自動空格（「5-6分鐘」「5～6分鐘」→「5 - 6 分鐘」） */
 const HAN = '\\u4e00-\\u9fff\\u3400-\\u4dbf\\u3001\\u3002\\uff0c\\uff01\\uff1f\\uff1a\\uff1b\\uff08\\uff09'
 const HAN_RE1 = new RegExp(`([${HAN}])([A-Za-z0-9])`, 'g')
 const HAN_RE2 = new RegExp(`([A-Za-z0-9])([${HAN}])`, 'g')
+const NUM_RANGE_RE = /(\d)\s*[-–—~～]\s*(?=\d)/g
 export function sp(text: string): string {
   if (!text) return ''
-  return text.replace(HAN_RE1, '$1 $2').replace(HAN_RE2, '$1 $2')
+  return text.replace(NUM_RANGE_RE, '$1 - ').replace(HAN_RE1, '$1 $2').replace(HAN_RE2, '$1 $2')
 }
